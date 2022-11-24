@@ -3,9 +3,8 @@ import java.net.Socket;
 import java.util.Scanner;
 
 public class Main {
-
     public static Socket socket;
-
+    // Connecting to the server socket
     static {
         try {
             socket = new Socket("127.0.0.1", 1337);
@@ -14,34 +13,17 @@ public class Main {
         }
     }
 
-    public static void main(String[] args) throws IOException, InterruptedException {
+    static Client userClient = new Client();
+    static Server server = new Server();
+
+    // The User Thread
+    static Thread listenUser = new Thread(userClient, "User");
+    // The Server Thread
+    static Thread listenServer = new Thread(server, "Server");
+
+    public static void main(String[] args) throws InterruptedException {
+
         Scanner consoleInput = new Scanner(System.in);
-        Client userClient = new Client();
-
-        Thread listenUser = new Thread(userClient, "User");
-        Thread listenServer = new Thread(new Runnable() {
-            @Override
-            public void run() {
-                while(true) {
-
-                    InputStream input = null;
-                    try {
-                        input = socket.getInputStream();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    BufferedReader serverReader = new BufferedReader(new InputStreamReader(input));
-
-                    String serverResponse = null;
-                    try {
-                        serverResponse = serverReader.readLine();
-                    } catch (IOException e) {
-                        throw new RuntimeException(e);
-                    }
-                    System.out.println(serverResponse);
-                }
-            }
-        }, "Server");
 
         listenUser.start();
         listenServer.start();
