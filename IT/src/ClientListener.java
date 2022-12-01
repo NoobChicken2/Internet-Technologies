@@ -1,7 +1,12 @@
 import java.io.*;
+import java.net.Socket;
 import java.util.Scanner;
 
-public class Client implements Runnable {
+public class ClientListener implements Runnable {
+    private Socket socket;
+    public ClientListener(Socket socket) {
+        this.socket=socket;
+    }
 
     @Override
     public void run() {
@@ -10,18 +15,13 @@ public class Client implements Runnable {
         OutputStream output = null;
 
         try {
-            output = Main.socket.getOutputStream();
+            output = this.socket.getOutputStream();
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
 
         PrintWriter clientWriter = new PrintWriter(output);
-
-        while(true) {
-            System.out.print("Write to the server: ");
-            String line = consoleInput.nextLine();
-            clientWriter.println(line);
-            clientWriter.flush();
-        }
+        clientWriter.println();//message
+        clientWriter.flush();
     }
 }
