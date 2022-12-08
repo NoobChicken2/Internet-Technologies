@@ -8,4 +8,8 @@ public class User {
         this.name=clientName;
         this.messageProcessor=messageProcessor;
     }
+
+    public String getName() {
+        return name;
+    }
 }

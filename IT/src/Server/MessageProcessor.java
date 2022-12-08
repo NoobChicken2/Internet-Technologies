@@ -1,11 +1,7 @@
 package Server;
 
-import Client.ListenOutputStream;
-import jdk.jshell.ImportSnippet;
-
 import java.io.*;
 import java.net.Socket;
-import java.util.stream.Collectors;
 
 public class MessageProcessor implements Runnable{
     private Socket socket;
@@ -22,69 +18,49 @@ public class MessageProcessor implements Runnable{
 
     @Override
     public void run() {
-        PrintWriter sendMessage = new PrintWriter(outputStream);
-        BufferedReader readMessage = new BufferedReader(new InputStreamReader(inputStream));
+        sendMessage("INIT Welcome to Yani/Klaus server!");
         while (true) {
             try {
                 // getting answers from client
+                BufferedReader readMessage = new BufferedReader(new InputStreamReader(inputStream));
                 receivedString=readMessage.readLine();
+                String[] response = receivedString.split(" ");
 
-                //Ending the connection
-                if(receivedString.startsWith("QUIT")) {
-                    stringToReturn = "OK GOODBYE";
-                    //TODO BROADCAST TO EVERYONE THAT CLIENT HAS DISCONNECTED
-                    sendMessage.println(stringToReturn);
-                    sendMessage.flush();
-                    stringToReturn="";
-                    this.socket.close();
-                    break;
-                }
-
-                //Logging in
-                if (receivedString.startsWith("IDENT")){
-                    String[] response = receivedString.split(" ");
-                    String clientName=response[1];
-                    User newUser=new User(clientName,this);
-                    Server.clients.put(clientName,newUser);
-                    stringToReturn=": OK IDENT "+ clientName;
-                    //TODO BROADCAST TO EVERYONE THAT SOMEONE HAS JOINED
-                    Server.broadcast("JOINED "+ clientName);
-                    sendMessage.println(stringToReturn);
-                    sendMessage.flush();
-                    stringToReturn="";
-                }
-
-                //another user logs in
-                if (receivedString.startsWith("JOINED")){
-                    receivedString=stringToReturn;
-                    sendMessage.println();
-                    sendMessage.flush();
-                    receivedString="";
-
-
-                }
-                //Broadcasting messages
-                if (receivedString.startsWith("BCST")){
-                    String[] response = receivedString.split(" ");
-                    String message= response[1];
-                    //TODO BROADCAST MESSAGE TO EVERYONE MESSAGE
-                    stringToReturn="OK BCST "+ message;
-                    sendMessage.println(stringToReturn);
-                    sendMessage.flush();
-                    stringToReturn="";
+                switch (response[0]){
+                    case "QUIT" ->{
+                        stringToReturn = "OK GOODBYE";
+                        //TODO BROADCAST TO EVERYONE THAT CLIENT HAS DISCONNECTED
+                        sendMessage(stringToReturn);
+//                        Server.broadcast();
+                        stringToReturn="";
+                        this.socket.close();
+                    }
+                    case "IDENT" ->{
+                        String clientName=response[1];
+                        User newUser=new User(clientName,this);
+                        Server.clients.put(clientName,newUser);
+                        stringToReturn=":OK IDENT "+ clientName;
+                        Server.broadcast("JOINED "+ clientName, newUser);
+                        sendMessage(stringToReturn);
+                        stringToReturn="";
+                    }
+                    case "BCST" ->{
+                        String message= response[1];
+                        //Server.broadcast(message );
+                        stringToReturn="OK BCST "+ message;
+                        sendMessage(stringToReturn);
+                        stringToReturn="";
+                    }
                 }
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        try {
-            // closing resources
-            this.inputStream.close();
-            this.outputStream.close();
-
-        }catch(IOException e){
-            e.printStackTrace();
-        }
     }
 
+    public void sendMessage(String message) {
+        PrintWriter sendMessage = new PrintWriter(outputStream);
+        sendMessage.println(message);
+        sendMessage.flush();
+    }
 }

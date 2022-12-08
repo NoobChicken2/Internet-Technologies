@@ -5,7 +5,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -33,17 +32,17 @@ public class Server {
 
             //creating the new client
             MessageProcessor messageProcessor=new MessageProcessor(socket, inputStream, outputStream);
-            System.out.println("INIT");
             Thread client = new Thread(messageProcessor);
             client.start();
 
             // TODO: Start a ping thread for each connecting client.
         }
     }
-    public static void broadcast(String message){
-        //TODO check not to send message to the same client
+    public static void broadcast(String message, User sendingClient){
         for (User user : clients.values()) {
-            user.messageProcessor.receivedString=message;
+            if (!user.getName().equals(sendingClient.getName())){
+                user.messageProcessor.sendMessage(message);
+            }
         }
     }
 
