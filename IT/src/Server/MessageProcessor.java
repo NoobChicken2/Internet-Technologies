@@ -44,7 +44,7 @@ public class MessageProcessor implements Runnable{
                 if (receivedString.startsWith("IDENT")){
                     String[] response = receivedString.split(" ");
                     String clientName=response[1];
-                    User newUser=new User(clientName);
+                    User newUser=new User(clientName,this);
                     Server.clients.put(clientName,newUser);
                     stringToReturn=": OK IDENT "+ clientName;
                     //TODO BROADCAST TO EVERYONE THAT SOMEONE HAS JOINED
@@ -54,6 +54,15 @@ public class MessageProcessor implements Runnable{
                     stringToReturn="";
                 }
 
+                //another user logs in
+                if (receivedString.startsWith("JOINED")){
+                    receivedString=stringToReturn;
+                    sendMessage.println();
+                    sendMessage.flush();
+                    receivedString="";
+
+
+                }
                 //Broadcasting messages
                 if (receivedString.startsWith("BCST")){
                     String[] response = receivedString.split(" ");

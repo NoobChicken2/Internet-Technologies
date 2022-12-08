@@ -41,10 +41,10 @@ public class Server {
         }
     }
     public static void broadcast(String message){
-        //TODO LOOP THROUGH THE HASHMAP OF CLIENTS AND SEND THE BROADCAST MESSAGE TO EVERYONE
-//        clients.entrySet().stream().forEach(
-//                input ->
-//        );
+        //TODO check not to send message to the same client
+        for (User user : clients.values()) {
+            user.messageProcessor.receivedString=message;
+        }
     }
 
 }

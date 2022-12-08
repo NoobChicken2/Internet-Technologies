@@ -40,6 +40,11 @@ public class ListenInputStream implements Runnable {
                 return;
             }
 
+            //new client joined
+            if (serverResponse.startsWith("JOINED")){
+                System.out.println(serverResponse);
+            }
+
             //Broadcasting messages
             String[] response = serverResponse.split(" ");
             if (serverResponse.startsWith("OK BCST")){
