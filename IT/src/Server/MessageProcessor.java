@@ -9,6 +9,7 @@ public class MessageProcessor implements Runnable{
     private OutputStream outputStream;
     protected String receivedString;
     protected String stringToReturn;
+    private String name;
 
     public MessageProcessor(Socket socket, InputStream inputStream, OutputStream outputStream) {
         this.socket = socket;
@@ -29,26 +30,25 @@ public class MessageProcessor implements Runnable{
                 switch (response[0]){
                     case "QUIT" ->{
                         stringToReturn = "OK GOODBYE";
-                        //TODO BROADCAST TO EVERYONE THAT CLIENT HAS DISCONNECTED
                         sendMessage(stringToReturn);
-//                        Server.broadcast();
+                        Server.broadcast("DISCONNECTED "+this.name ,this.name);
                         stringToReturn="";
                         this.socket.close();
                     }
                     case "IDENT" ->{
                         String clientName=response[1];
-                        User newUser=new User(clientName,this);
-                        Server.clients.put(clientName,newUser);
+                        Server.clients.put(clientName,this);
+                        this.name=clientName;
                         stringToReturn=":OK IDENT "+ clientName;
-                        Server.broadcast("JOINED "+ clientName, newUser);
                         sendMessage(stringToReturn);
+                        Server.broadcast("JOINED "+ clientName, this.name);
                         stringToReturn="";
                     }
                     case "BCST" ->{
                         String message= response[1];
-                        //Server.broadcast(message );
                         stringToReturn="OK BCST "+ message;
                         sendMessage(stringToReturn);
+                        Server.broadcast("BCST "+this.name+" "+message, this.name);
                         stringToReturn="";
                     }
                 }
@@ -56,6 +56,10 @@ public class MessageProcessor implements Runnable{
                 e.printStackTrace();
             }
         }
+    }
+
+    public String getName() {
+        return name;
     }
 
     public void sendMessage(String message) {

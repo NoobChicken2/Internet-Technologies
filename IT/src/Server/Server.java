@@ -11,7 +11,7 @@ import java.util.Map;
 public class Server {
     private static final int SERVER_PORT = 1337;
 
-    protected static Map<String, User> clients=new HashMap();
+    protected static Map<String, MessageProcessor> clients=new HashMap();
     static ServerSocket serverSocket;
     static {
         try {
@@ -38,10 +38,10 @@ public class Server {
             // TODO: Start a ping thread for each connecting client.
         }
     }
-    public static void broadcast(String message, User sendingClient){
-        for (User user : clients.values()) {
-            if (!user.getName().equals(sendingClient.getName())){
-                user.messageProcessor.sendMessage(message);
+    public static void broadcast(String message, String sendingClientName){
+        for (MessageProcessor user : clients.values()) {
+            if (!user.getName().equals(sendingClientName)){
+                user.sendMessage(message);
             }
         }
     }

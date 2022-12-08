@@ -29,30 +29,24 @@ public class ListenInputStream implements Runnable {
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-
-            //PING/PONG heartbeat
-            if (serverResponse.equals("PING")){
-                ListenOutputStream.command = "PONG";
-            }
-
-            //Ending the Connection
-            if (serverResponse.equals("OK Goodbye")){
-                return;
-            }
-
-            //new client joined
-            if (serverResponse.startsWith("JOINED")){
-                System.out.println(serverResponse);
-            }
-
-            //Broadcasting messages
             String[] response = serverResponse.split(" ");
-            if (serverResponse.startsWith("OK BCST")){
-                System.out.println("ME: "+response[2]);
-            }else if(response[0].equals("BCST")){
-                System.out.println(response[1]+": "+response[2]);
+            switch (response[0]){
+                case "PING" ->{
+                    ListenOutputStream.command = "PONG";
+                }case "OK Goodbye" ->{
+                    return;
+                }case "INIT" ->{
+                    System.out.println(serverResponse);
+                }case "JOINED" ->{
+                    System.out.println(response[1]+" joined the chat!");
+                }case "DISCONNECTED" ->{
+                    System.out.println(response[1]+" left the chat :(");
+                }case "OK" ->{
+                    System.out.println("ME: "+response[2]);
+                }case "BCST" ->{
+                    System.out.println(response[1]+": "+response[2]);
+                }
             }
-
         }
     }
 }
