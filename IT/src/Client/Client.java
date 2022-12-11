@@ -31,7 +31,10 @@ public class Client {
             System.out.println("""
                     -------------------------------------------
                     1. Broadcast a message
-                    2. QUIT
+                    2. Get List of all users
+                    3. Private message
+                    4. Start a survey
+                    5. QUIT
                     -------------------------------------------
                     """);
             int option = getUserInput();
@@ -42,6 +45,19 @@ public class Client {
                     ListenOutputStream.command = "BCST " + message;
                 }
                 case 2 -> {
+                    ListenOutputStream.command="LIST_REQUEST";
+                }
+                case 3 -> {
+                    System.out.print("Enter username you want to private message: ");
+                    String username = getUserInputString();
+                    System.out.print("Enter your message: ");
+                    String message = getUserInputString();
+                    ListenOutputStream.command="PRV_BCST "+ username+" "+message;
+                }
+                case 4 -> {
+                    //todo implement start a survey
+                }
+                case 5-> {
                     ListenOutputStream.command="QUIT";
                     System.out.println("Goodbye!");
                     System.exit(0);

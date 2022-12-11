@@ -38,12 +38,22 @@ public class Server {
             // TODO: Start a ping thread for each connecting client.
         }
     }
-    public static void broadcast(String message, String sendingClientName){
+    public static void broadcastMessage(String message, String sendingClientName){
         for (MessageProcessor user : clients.values()) {
             if (!user.getName().equals(sendingClientName)){
                 user.sendMessage(message);
             }
         }
+    }
+    public static String getClientList(){
+        String result=" ";
+        for (MessageProcessor user : clients.values()) {
+            result=result+user.getName()+" ";
+        }
+        return result;
+    }
+    public static void privateMessage(String client, String message){
+        clients.get(client).sendMessage(message);
     }
 
 }
