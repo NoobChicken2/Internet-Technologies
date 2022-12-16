@@ -6,7 +6,9 @@ import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class Client {
+
     public static Socket socket;
+    protected static boolean hasLoggedIn=false;
 
     static {
         try {
@@ -15,37 +17,30 @@ public class Client {
             throw new RuntimeException(e);
         }
     }
+    protected static int input;
 
     static Thread listenUser = new Thread(new ListenOutputStream());
     static Thread listenServer = new Thread(new ListenInputStream());
 
     public static void main(String[] args) throws InterruptedException {
-
-        System.out.println("Please login as a client: ");
-        ListenOutputStream.command = "IDENT " + getUserInputString();
-
         listenUser.start();
         listenServer.start();
+        Thread.sleep(1000);
 
-        while(true) {
-            System.out.println("""
-                    -------------------------------------------
-                    1. Broadcast a message
-                    2. Get List of all users
-                    3. Private message
-                    4. Start a survey
-                    5. QUIT
-                    -------------------------------------------
-                    """);
-            int option = getUserInput();
-            switch (option) {
+        while (hasLoggedIn==false){
+            login();
+            Thread.sleep(1000);
+        }
+        while (hasLoggedIn==true) {
+            menu();
+            input = getUserInput();
+            switch (input) {
                 case 1 -> {
                     System.out.print("Enter your message: ");
-                    String message = getUserInputString();
-                    ListenOutputStream.command = "BCST " + message;
+                    ListenOutputStream.command = "BCST " + getUserInputString();
                 }
                 case 2 -> {
-                    ListenOutputStream.command="LIST_REQUEST";
+                    ListenOutputStream.command = "LIST_REQUEST";
                 }
                 case 3 -> {
                     System.out.print("Enter username you want to private message: ");
@@ -64,6 +59,24 @@ public class Client {
                 }
             }
         }
+    }
+
+    protected static void menu() {
+
+        System.out.println("""
+                        -------------------------------------------
+                        1. Broadcast a message
+                        2. Get List of all users
+                        3. Private message
+                        4. Start a survey
+                        5. QUIT
+                        -------------------------------------------
+                       """);
+    }
+
+    public static void login(){
+        System.out.println("Please login as a client: ");
+        ListenOutputStream.command = "IDENT " + getUserInputString();
     }
     public static int getUserInput() {
 

@@ -34,7 +34,6 @@ public class Server {
             MessageProcessor messageProcessor=new MessageProcessor(socket, inputStream, outputStream);
             Thread client = new Thread(messageProcessor);
             client.start();
-
             // TODO: Start a ping thread for each connecting client.
         }
     }
@@ -45,10 +44,12 @@ public class Server {
             }
         }
     }
-    public static String getClientList(){
+    public static String getClientList(String sendingClientName){
         String result=" ";
         for (MessageProcessor user : clients.values()) {
-            result=result+user.getName()+" ";
+            if (!user.getName().equals(sendingClientName)) {
+                result = result + user.getName() + " ";
+            }
         }
         return result;
     }

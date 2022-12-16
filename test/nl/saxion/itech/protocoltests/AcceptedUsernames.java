@@ -44,7 +44,7 @@ class AcceptedUsernames {
         out.println("IDENT mym");
         out.flush();
         String serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK IDENT mym", serverResponse);
+        assertEquals("IDENT_OK mym", serverResponse);
     }
 
     @Test
@@ -62,7 +62,7 @@ class AcceptedUsernames {
         out.println("IDENT abcdefghijklmn");
         out.flush();
         String serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK IDENT abcdefghijklmn", serverResponse);
+        assertEquals("IDENT_OK abcdefghijklmn", serverResponse);
     }
 
     @Test

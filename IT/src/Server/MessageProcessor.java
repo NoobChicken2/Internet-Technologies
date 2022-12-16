@@ -10,7 +10,6 @@ public class MessageProcessor implements Runnable{
     private InputStream inputStream;
     private OutputStream outputStream;
     private String name;
-    private boolean exit=false;
 
     public MessageProcessor(Socket socket, InputStream inputStream, OutputStream outputStream) {
         this.socket = socket;
@@ -20,45 +19,52 @@ public class MessageProcessor implements Runnable{
 
     @Override
     public void run() {
-        sendMessage("INIT Welcome to Yani/Klaus server!");
+        boolean exit=false;
+        sendMessage("INIT Yani/Klaus server!");//todo first print init before asking for username
         while (!exit) {
             try {
                 // getting response from client
                 BufferedReader readMessage = new BufferedReader(new InputStreamReader(inputStream));
                 String receivedString=readMessage.readLine();
-                String[] response = receivedString.split(" ");
+                if (receivedString==null){
+                    sendMessage("FAIL00 Unkown command");
+                }else{
+                    String[] response = receivedString.split(" ");
 
-                switch (response[0]){
-                    case "QUIT" ->{
-                        String message = "OK GOODBYE";
-                        sendMessage(message);
-                        Server.broadcastMessage("DISCONNECTED "+this.name ,this.name);
-                        Server.clients.remove(this.name);
-                        exit=true;
-                    }
-                    case "IDENT" ->{
-                        String clientName=response[1];
-                        if (checkClientName(clientName)) {
-                            Server.clients.put(clientName, this);
-                            this.name = clientName;
-                            String message = ":OK IDENT " + clientName;
-                            sendMessage(message);
-                            Server.broadcastMessage("JOINED " + clientName, this.name);
+                    switch (response[0]){
+                        case "IDENT" ->{
+                            if (response.length<2){//check if name is null
+                                sendMessage("FAIL02 Username has an invalid format or length");
+                            }else {
+                                if (checkClientName(response[1])) {
+                                    register(response[1]);
+                                }
+                            }
                         }
-                    }
-                    case "BCST" ->{
-                        String message="OK BCST "+ response[1];
-                        sendMessage(message);
-                        Server.broadcastMessage("BCST "+this.name+" "+response[1], this.name);
-                    }
-                    case "LIST_REQUEST" ->{
-                        String message= "LIST_RESPONSE";
-                        message=message+Server.getClientList();
-                        sendMessage(message);
-                    }
-                    case "PRV_BCST" ->{
-                        String message= "PRV_BCST "+this.name+" "+response[2];
-                        Server.privateMessage(response[1], message);
+                        case "QUIT" ->{
+                            if (checkClientLoggedIn()) {
+                                quit();
+                                exit = true;
+                            }
+                        }
+                        case "BCST" ->{
+                            if (checkClientLoggedIn()) {
+                                broadcast(response[1]);
+                            }
+                        }
+                        case "LIST_REQUEST" ->{
+                            if (checkClientLoggedIn()) {
+                                getListOfClients();
+                            }
+                        }
+                        case "PRV_BCST" ->{
+                            if (checkClientLoggedIn()) {
+                                sendPrivateMessage(response[1], response[2]);
+                            }
+                        }
+                        default -> {
+                            sendMessage("FAIL00 Unkown command");
+                        }
                     }
                 }
             } catch (IOException e) {
@@ -66,26 +72,71 @@ public class MessageProcessor implements Runnable{
             }
         }
     }
+
     private boolean checkClientName(String clientName) {
         if (Server.clients.containsKey(clientName)){
             sendMessage("FAIL01 User already logged in");
             return false;
         }
-        Pattern pattern = Pattern.compile("([A-Za-z0-9\\-\\_]+)", Pattern.CASE_INSENSITIVE);
-        Matcher matcher = pattern.matcher(clientName);
-        boolean matchFound = matcher.find();
-        if (!matchFound){
+        if (clientName.length()<3){
             sendMessage("FAIL02 Username has an invalid format or length");
             return false;
         }
+        if (clientName.length()>=15){
+            sendMessage("FAIL02 Username has an invalid format or length");
+            return false;
+        }
+        for (int i = 0; i < clientName.length(); i++) {
+            if ((Character.isLetterOrDigit(clientName.charAt(i)) == false)) {
+                sendMessage("FAIL02 Username has an invalid format or length");
+                return false;
+            }
+        }
         return true;
     }
-    public String getName() {
-        return name;
+    private boolean checkClientLoggedIn(){
+        if (!this.name.equals(null)) {
+            return true;
+        }else {
+            sendMessage("FAIL03 Please log in first");
+            return false;
+        }
+    }
+    private void quit(){
+        String message = "QUIT_OK ";
+        sendMessage(message);
+        Server.broadcastMessage("DISCONNECTED " + this.name, this.name);
+        Server.clients.remove(this.name);
+    }
+    private void register(String clientName){
+        Server.clients.put(clientName, this);
+        this.name = clientName;
+        String message = "IDENT_OK " + clientName;
+        sendMessage(message);
+        Server.broadcastMessage("JOINED " + clientName, this.name);
+    }
+    private void broadcast(String BroadcastMessage){
+        String message = "BCST_OK " + BroadcastMessage;
+        sendMessage(message);
+        Server.broadcastMessage("BCST " + this.name + " " + BroadcastMessage, this.name);
+
+    }
+    private void getListOfClients(){
+        String message= "LIST_RESPONSE";
+        message=message+Server.getClientList(this.name);
+        sendMessage(message);
+    }
+    private void sendPrivateMessage(String receiver, String privateMessage) {
+        sendMessage("PRV_BCST_OK "+ privateMessage);
+        String message = "PRV_BCST " + this.name + " " + privateMessage;
+        Server.privateMessage(receiver, message);
     }
     public void sendMessage(String message) {
         PrintWriter sendMessage = new PrintWriter(outputStream);
         sendMessage.println(message);
         sendMessage.flush();
+    }
+    public String getName() {
+        return name;
     }
 }

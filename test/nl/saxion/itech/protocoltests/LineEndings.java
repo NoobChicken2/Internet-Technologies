@@ -44,31 +44,31 @@ class LineEndings {
         out.print("IDENT myname\r\nBCST a\r\n");
         out.flush();
         String serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK IDENT myname", serverResponse);
+        assertEquals("IDENT_OK myname", serverResponse);
         serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK BCST a", serverResponse);
+        assertEquals("BCST_OK a", serverResponse);
     }
 
     @Test
     void TC2_2_identFollowedByBCSTWithLinuxLineEndingsReturnsOk() {
         receiveLineWithTimeout(in); //init message
-        out.print("IDENT myname\nBCST a\n");
+        out.print("IDENT myname1\nBCST a\n");
         out.flush();
         String serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK IDENT myname", serverResponse);
+        assertEquals("IDENT_OK myname1", serverResponse);
         serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK BCST a", serverResponse);
+        assertEquals("BCST_OK a", serverResponse);
     }
 
     @Test
     void TC2_3_identFollowedByBCSTWithSlashRLineEndingsReturnsOk() {
         receiveLineWithTimeout(in); //init message
-        out.print("IDENT myname\nBCST a\n");
+        out.print("IDENT myname2\nBCST a\n");
         out.flush();
         String serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK IDENT myname", serverResponse);
+        assertEquals("IDENT_OK myname2", serverResponse);
         serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK BCST a", serverResponse);
+        assertEquals("BCST_OK a", serverResponse);
     }
 
     private String receiveLineWithTimeout(BufferedReader reader){
