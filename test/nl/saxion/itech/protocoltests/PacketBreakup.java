@@ -48,9 +48,9 @@ class PacketBreakup {
         out.print("ST a\r\n");
         out.flush();
         String serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK IDENT myname", serverResponse);
+        assertEquals("IDENT_OK myname", serverResponse);
         serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK BCST a", serverResponse);
+        assertEquals("BCST_OK a", serverResponse);
     }
 
     private String receiveLineWithTimeout(BufferedReader reader){

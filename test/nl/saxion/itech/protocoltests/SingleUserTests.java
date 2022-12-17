@@ -47,16 +47,16 @@ class SingleUserTests {
     @Test
     void TC5_1_initialConnectionToServerReturnsInitMessage() {
         String firstLine = receiveLineWithTimeout(in);
-        assertTrue(firstLine.startsWith("INIT Welcome"));
+        assertTrue(firstLine.startsWith("INIT"));
     }
 
     @Test
     void TC5_2_validIdentMessageReturnsOkMessage() {
         receiveLineWithTimeout(in); //init message
-        out.println("IDENT myname");
+        out.println("IDENT mynameT1");
         out.flush();
         String serverResponse = receiveLineWithTimeout(in);
-        assertEquals("OK IDENT myname", serverResponse);
+        assertEquals("IDENT_OK mynameT1", serverResponse);
     }
 
     @Test
@@ -91,7 +91,7 @@ class SingleUserTests {
         receiveLineWithTimeout(in); //init message
         out.println("IDENT first");
         out.flush();
-        assertEquals("OK IDENT first", receiveLineWithTimeout(in));
+        assertEquals("IDENT_OK first", receiveLineWithTimeout(in));
         out.println("IDENT second");
         out.flush();
         assertEquals("FAIL04 User cannot login twice", receiveLineWithTimeout(in));

@@ -11,7 +11,7 @@ import java.util.Map;
 public class Server {
     private static final int SERVER_PORT = 1337;
 
-    protected static Map<String, MessageProcessor> clients=new HashMap();
+    public static Map<String, MessageProcessor> clients=new HashMap();
     static ServerSocket serverSocket;
     static {
         try {

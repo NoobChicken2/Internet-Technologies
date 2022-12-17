@@ -17,7 +17,7 @@ class MultipleUserTests {
     private BufferedReader inUser1, inUser2;
     private PrintWriter outUser1, outUser2;
 
-    private final static int max_delta_allowed_ms = 100;
+    private final static int max_delta_allowed_ms = 1000;
 
     @BeforeAll
     static void setupAll() throws IOException {
@@ -89,7 +89,7 @@ class MultipleUserTests {
         outUser1.println("BCST messagefromuser1");
         outUser1.flush();
         String fromUser1 = receiveLineWithTimeout(inUser1);
-        assertEquals("OK BCST messagefromuser1", fromUser1);
+        assertEquals("BCST_OK messagefromuser1", fromUser1);
 
         String fromUser2 = receiveLineWithTimeout(inUser2);
         assertEquals("BCST user1 messagefromuser1", fromUser2);
@@ -98,7 +98,7 @@ class MultipleUserTests {
         outUser2.println("BCST messagefromuser2");
         outUser2.flush();
         fromUser2 = receiveLineWithTimeout(inUser2);
-        assertEquals("OK BCST messagefromuser2", fromUser2);
+        assertEquals("BCST_OK messagefromuser2", fromUser2);
 
         fromUser1 = receiveLineWithTimeout(inUser1);
         assertEquals("BCST user2 messagefromuser2", fromUser1);
