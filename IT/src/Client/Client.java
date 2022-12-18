@@ -9,6 +9,7 @@ public class Client {
 
     public static Socket socket;
     protected static boolean hasLoggedIn=false;
+    protected static boolean survey=false;
 
     static {
         try {
@@ -17,7 +18,6 @@ public class Client {
             throw new RuntimeException(e);
         }
     }
-    protected static int input;
 
     static Thread listenUser = new Thread(new ListenOutputStream());
     static Thread listenServer = new Thread(new ListenInputStream());
@@ -33,8 +33,7 @@ public class Client {
         }
         while (hasLoggedIn==true) {
             menu();
-            input = getUserInput();
-            switch (input) {
+            switch (getUserInput()) {
                 case 1 -> {
                     System.out.print("Enter your message: ");
                     ListenOutputStream.command = "BCST " + getUserInputString();
@@ -50,7 +49,22 @@ public class Client {
                     ListenOutputStream.command="PRV_BCST "+ username+" "+message;
                 }
                 case 4 -> {
-                    //todo implement start a survey
+                    ListenOutputStream.command="SURVEY START";
+                    Thread.sleep(1000);
+                    while (survey==true){
+                        Thread.sleep(1000);
+                        sendQuestion();
+                        System.out.println("Do you want to add a new Question?  1. Yes  |  2. No");
+                        int input =getUserInput();//todo prevent the bug from ansking the new question before user even responds
+                        if (input==1){
+                            sendQuestion();
+                        }else {
+                            ListenOutputStream.command="SURVEY Q_STOP";
+                            survey=false;//todo this is wrong for now !!!
+                        }
+                        Thread.sleep(1000);
+                    }
+
                 }
                 case 5-> {
                     ListenOutputStream.command="QUIT";
@@ -99,5 +113,20 @@ public class Client {
             return "";
         }
     }
-
+    public static void sendQuestion(){
+        String message="SURVEY Q ";
+        System.out.println("Please enter your question:");
+        message=message+getUserInputString()+" ";
+        System.out.println("How many answers are in this question? (min:2/max:4)");
+        int numOfAns=Client.getUserInput();
+        while (numOfAns<2||numOfAns>4){
+            System.out.println("invalid number of answers enter number of answers again");
+            numOfAns=Client.getUserInput();
+        }
+        for (int i=0;i<numOfAns;i++){
+            System.out.println("enter your answer");
+            message=message+getUserInputString()+" ";
+        }
+        ListenOutputStream.command=message;
+    }
 }

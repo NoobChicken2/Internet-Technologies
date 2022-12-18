@@ -12,7 +12,7 @@ public class Server {
     private static final int SERVER_PORT = 1337;
 
     public static Map<String, MessageProcessor> clients=new HashMap();
-    static ServerSocket serverSocket;
+    public static ServerSocket serverSocket;
     static {
         try {
             serverSocket = new ServerSocket(SERVER_PORT);

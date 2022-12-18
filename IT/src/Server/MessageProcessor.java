@@ -1,16 +1,19 @@
 package Server;
 
 import Server.ServerResponse.*;
+import Server.ServerResponse.ServerResponseSurvey;
+import Server.ServerResponse.Survey.Survey;
 
 import java.io.*;
 import java.net.Socket;
 
 public class MessageProcessor implements Runnable{
-    protected Socket socket;
+    public Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
     protected String name;
     protected boolean exit=false;
+    protected Survey survey;
 
     public MessageProcessor(Socket socket, InputStream inputStream, OutputStream outputStream) {
         this.socket = socket;
@@ -41,19 +44,23 @@ public class MessageProcessor implements Runnable{
                             responseManager.respond(receivedString);
                         }
                         case "QUIT" ->{
-                            responseManager.setServerResponse(new ServerResponseQuit());
+                            responseManager.setServerResponse(new ServerResponseQuit(this));
                             responseManager.respond(receivedString);
                         }
                         case "BCST" ->{
-                            responseManager.setServerResponse(new ServerResponseBroadcast());
+                            responseManager.setServerResponse(new ServerResponseBroadcast(this));
                             responseManager.respond(receivedString);
                         }
                         case "LIST_REQUEST" ->{
-                            responseManager.setServerResponse(new ServerResponseListRequest());
+                            responseManager.setServerResponse(new ServerResponseListRequest(this));
                             responseManager.respond(receivedString);
                         }
                         case "PRV_BCST" ->{
-                            responseManager.setServerResponse(new ServerResponsePrivateMessage());
+                            responseManager.setServerResponse(new ServerResponsePrivateMessage(this));
+                            responseManager.respond(receivedString);
+                        }
+                        case "SURVEY" ->{
+                            responseManager.setServerResponse(new ServerResponseSurvey(this));
                             responseManager.respond(receivedString);
                         }
                         default -> {
@@ -66,7 +73,7 @@ public class MessageProcessor implements Runnable{
             }
         }
     }
-    protected boolean checkClientLoggedIn(){
+    public boolean checkClientLoggedIn(){
         if (this.name==null) {
             sendMessage("FAIL03 Please log in first");
             return false;
@@ -78,10 +85,19 @@ public class MessageProcessor implements Runnable{
         sendMessage.println(message);
         sendMessage.flush();
     }
+    public void createSurvey(){
+        survey=new Survey();
+    }
     public String getName() {
         return name;
     }
     public void setName(String name) {
         this.name = name;
+    }
+    public Survey getSurvey() {
+        return survey;
+    }
+    public void setExit(boolean exit) {
+        this.exit = exit;
     }
 }

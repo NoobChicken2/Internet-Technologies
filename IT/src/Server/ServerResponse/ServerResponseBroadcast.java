@@ -7,18 +7,20 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
 
-public class ServerResponseBroadcast extends MessageProcessor implements ServerResponse{
+public class ServerResponseBroadcast  implements ServerResponse{
+    private MessageProcessor mp;
 
-    public ServerResponseBroadcast() {
+    public ServerResponseBroadcast(MessageProcessor mp) {
+        this.mp=mp;
     }
 
     @Override
     public void respond(String request) {
         String[] response = request.split(" ");
-        if (response.length<2){//check if name is null
-            sendMessage("FAIL02 Username has an invalid format or length");
+        if (response.length<2){//check if there are any arguments after header
+            mp.sendMessage("FAIL00 Unkown command");
         }else {
-            if (checkClientLoggedIn()) {
+            if (mp.checkClientLoggedIn()) {
                 broadcast(response[1]);
             }
         }
@@ -26,8 +28,8 @@ public class ServerResponseBroadcast extends MessageProcessor implements ServerR
     }
     private void broadcast(String BroadcastMessage){
         String message = "BCST_OK " + BroadcastMessage;
-        sendMessage(message);
-        Server.broadcastMessage("BCST " + this.name + " " + BroadcastMessage, this.name);
+        mp.sendMessage(message);
+        Server.broadcastMessage("BCST " + mp.getName() + " " + BroadcastMessage, mp.getName());
 
     }
 }
