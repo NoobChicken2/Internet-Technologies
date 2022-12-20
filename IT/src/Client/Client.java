@@ -10,10 +10,11 @@ public class Client {
     public static Socket socket;
     protected static boolean hasLoggedIn=false;
     protected static boolean survey=false;
+    public static boolean pongAllowed = true;
 
     static {
         try {
-            socket = new Socket("127.0.0.1", 1337);
+            socket = new Socket("127.0.0.1", 8000);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

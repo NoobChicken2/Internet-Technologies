@@ -9,7 +9,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Server {
-    private static final int SERVER_PORT = 1337;
+    private static final int SERVER_PORT = 8000;
 
     public static Map<String, MessageProcessor> clients=new HashMap();
     public static ServerSocket serverSocket;

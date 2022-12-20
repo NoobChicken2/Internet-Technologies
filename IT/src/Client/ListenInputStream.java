@@ -40,7 +40,6 @@ public class ListenInputStream implements Runnable {
                         throw new RuntimeException(e);
                     }
                     return;
-
                 }case "INIT" ->{
                     System.out.println(serverResponse);
                 }case "IDENT_OK" ->{
@@ -80,6 +79,8 @@ public class ListenInputStream implements Runnable {
                     System.out.println("User cannot login twice");
                 }case "FAIL05" ->{
                     System.out.println("Not enough users for survey");
+                }case "FAIL09" ->{
+                    System.out.println("Pong sent without receiving a ping");
                 }case "FAIL00" ->{
                     System.out.println("invalid command");
                 }

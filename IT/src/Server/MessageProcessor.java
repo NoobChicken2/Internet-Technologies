@@ -14,6 +14,7 @@ public class MessageProcessor implements Runnable{
     protected String name;
     protected boolean exit=false;
     protected Survey survey;
+    private Thread clientHeartbeat;
 
     public MessageProcessor(Socket socket, InputStream inputStream, OutputStream outputStream) {
         this.socket = socket;
@@ -26,6 +27,11 @@ public class MessageProcessor implements Runnable{
 
     @Override
     public void run() {
+        //Start heartbeat
+        Heartbeat heartbeat = new Heartbeat(this);
+        clientHeartbeat = new Thread(heartbeat);
+        clientHeartbeat.start();
+
         sendMessage("INIT Yani/Klaus server!");
         ServerResponseManager responseManager=new ServerResponseManager();
         while (!exit) {
@@ -63,6 +69,13 @@ public class MessageProcessor implements Runnable{
                             responseManager.setServerResponse(new ServerResponseSurvey(this));
                             responseManager.respond(receivedString);
                         }
+                        case "PONG" -> {
+                            if (heartbeat.getIsPingSet()) {
+                                heartbeat.setPongTrue();
+                            } else {
+                                sendMessage("FAIL09 Pong without ping");
+                            }
+                        }
                         default -> {
                             sendMessage("FAIL00 Unkown command");
                         }
@@ -99,5 +112,10 @@ public class MessageProcessor implements Runnable{
     }
     public void setExit(boolean exit) {
         this.exit = exit;
+    }
+    public void stopHeartbeat() {
+        if (clientHeartbeat.isAlive()) {
+            clientHeartbeat.interrupt();
+        }
     }
 }

@@ -16,18 +16,24 @@ public class ServerResponseQuit implements ServerResponse{
 
     @Override
     public void respond(String request) {
+        String[] quitType = request.split(" ");
         if (mp.checkClientLoggedIn()) {
             try {
-                quit();
+                quit(quitType[0]);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
             mp.setExit(true);
+            //Stops the heartbeat thread of the message processor
+            mp.stopHeartbeat();
         }
     }
 
-    private void quit() throws IOException {
+    private void quit(String quitType) throws IOException {
         String message = "QUIT_OK";
+        if (quitType.equals("DSCN")) {
+            message = "DSCN";
+        }
         mp.sendMessage(message);
         Server.broadcastMessage("DISCONNECTED " + mp.getName(), mp.getName());
         Server.clients.remove(mp.getName());
