@@ -28,11 +28,11 @@ public class Client {
         listenServer.start();
         Thread.sleep(1000);
 
-        while (hasLoggedIn==false){
+        while (!hasLoggedIn){
             login();
             Thread.sleep(1000);
         }
-        while (hasLoggedIn==true) {
+        while (hasLoggedIn) {
             menu();
             switch (getUserInput()) {
                 case 1 -> {
@@ -71,6 +71,9 @@ public class Client {
                     ListenOutputStream.command="QUIT";
                     System.out.println("Goodbye!");
                     System.exit(0);
+                }
+                case 6 -> {
+                    pongAllowed = !pongAllowed;
                 }
             }
         }

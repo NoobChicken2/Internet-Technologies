@@ -46,6 +46,7 @@ public class MessageProcessor implements Runnable{
                     String[] response = receivedString.split(" ");
                     switch (response[0]){
                         case "IDENT" ->{
+                           // new ServerResponseLogin(this).respond(receivedString);
                             responseManager.setServerResponse(new ServerResponseLogin(this));
                             responseManager.respond(receivedString);
                         }
@@ -82,7 +83,8 @@ public class MessageProcessor implements Runnable{
                     }
                 }
             } catch (IOException e) {
-                e.printStackTrace();
+                System.out.println(name + " timed out and was disconnected");
+                new ServerResponseQuit(this).respond("DCSN");
             }
         }
     }

@@ -1,5 +1,6 @@
 package Server.ServerResponse;
 
+import GlobalUtilities.Utils;
 import Server.MessageProcessor;
 import Server.Server;
 
@@ -19,7 +20,7 @@ public class ServerResponsePrivateMessage implements ServerResponse{
             mp.sendMessage("FAIL00 Unkown command");
         }else {
             if (mp.checkClientLoggedIn()) {
-                sendPrivateMessage(response[1], response[2]);
+                sendPrivateMessage(response[1], Utils.combinedMessage(2, response));
             }
         }
     }
@@ -29,4 +30,5 @@ public class ServerResponsePrivateMessage implements ServerResponse{
         String message = "PRV_BCST " + mp.getName() + " " + privateMessage;
         Server.privateMessage(receiver, message);
     }
+
 }

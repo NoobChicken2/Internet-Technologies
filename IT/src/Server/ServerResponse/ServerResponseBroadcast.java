@@ -1,11 +1,8 @@
 package Server.ServerResponse;
 
+import GlobalUtilities.Utils;
 import Server.MessageProcessor;
 import Server.Server;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
 
 public class ServerResponseBroadcast  implements ServerResponse{
     private MessageProcessor mp;
@@ -21,7 +18,7 @@ public class ServerResponseBroadcast  implements ServerResponse{
             mp.sendMessage("FAIL00 Unkown command");
         }else {
             if (mp.checkClientLoggedIn()) {
-                broadcast(response[1]);
+                broadcast(Utils.combinedMessage(1, response));
             }
         }
 
@@ -30,6 +27,5 @@ public class ServerResponseBroadcast  implements ServerResponse{
         String message = "BCST_OK " + BroadcastMessage;
         mp.sendMessage(message);
         Server.broadcastMessage("BCST " + mp.getName() + " " + BroadcastMessage, mp.getName());
-
     }
 }

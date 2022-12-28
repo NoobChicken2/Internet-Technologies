@@ -9,7 +9,7 @@ import java.util.TimerTask;
 public class Heartbeat implements Runnable{
 
     private static final boolean SHOULD_PING = true;
-    private static final int PING_FREQ_MS = 5000;
+    private static final int PING_FREQ_MS = 10000;
     private static final int PING_TIMEOUT_MS = 3000;
     private boolean isPongReceived = false;
     private boolean isPingSent = false;
@@ -50,9 +50,7 @@ public class Heartbeat implements Runnable{
                     // Check if the pong is received after 3 seconds
                     if (!isPongReceived){
                         String message = "DSCN Pong timeout";
-                        ServerResponseManager responseManager = new ServerResponseManager();
-                        responseManager.setServerResponse(new ServerResponseQuit(messageProcessor));
-                        responseManager.respond(message);
+                        new ServerResponseQuit(messageProcessor).respond(message);
                         pingTimer.cancel();
                         pingTimer.purge();
                     }

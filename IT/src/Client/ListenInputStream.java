@@ -1,5 +1,7 @@
 package Client;
 
+import GlobalUtilities.Utils;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
@@ -23,23 +25,29 @@ public class ListenInputStream implements Runnable {
         BufferedReader serverReader = new BufferedReader(new InputStreamReader(inputServer()));
 
         while (true) {
-            String serverResponse = null;
+            String serverResponse = "";
             try {
                 serverResponse = serverReader.readLine();
+
+                if (serverResponse == null) {
+                    System.out.println("You have timed out!");
+                    System.exit(0);
+                }
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
-            String[] response = serverResponse.split(" ");
+            String[] response = serverResponse.split(" ");;
             switch (response[0]){
                 case "PING" ->{
-                    ListenOutputStream.command = "PONG";
+                    if (Client.pongAllowed) {
+                        ListenOutputStream.command = "PONG";
+                    }
                 }case "QUIT_OK" ->{
                     try {
                         Client.socket.close();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
-                    return;
                 }case "INIT" ->{
                     System.out.println(serverResponse);
                 }case "IDENT_OK" ->{
@@ -49,9 +57,9 @@ public class ListenInputStream implements Runnable {
                 }case "DISCONNECTED" ->{
                     System.out.println(response[1]+" left the chat :(");
                 }case "BCST_OK" ->{
-                    System.out.println("ME: "+response[1]);
+                    System.out.println("ME: "+ Utils.combinedMessage(1, response));
                 }case "BCST" ->{
-                    System.out.println(response[1]+": "+response[2]);
+                    System.out.println(response[1]+": "+ Utils.combinedMessage(2,response));
                 }case "LIST_RESPONSE" ->{
                     for (int i=1;i<response.length;i++){
                         System.out.println(response[i]);
@@ -59,7 +67,7 @@ public class ListenInputStream implements Runnable {
                 }case "PRV_BCST_OK" ->{
                     //todo private message sent do what?
                 }case "PRV_BCST" ->{
-                    System.out.println("PRIVATE< "+response[1]+": "+response[2]+" >");
+                    System.out.println("PRIVATE< "+response[1]+": "+ Utils.combinedMessage(2, response)+" >");
                 }case "SURVEY_OK" ->{
                     Client.survey=true;
                 }case "SURVEY_Q_OK" ->{
