@@ -28,7 +28,7 @@ public class ServerResponsePrivateMessage implements ServerResponse{
     private void sendPrivateMessage(String receiver, String privateMessage) {
         mp.sendMessage("PRV_BCST_OK "+ privateMessage);
         String message = "PRV_BCST " + mp.getName() + " " + privateMessage;
-        Server.privateMessage(receiver, message);
+        Server.messageClient(receiver, message);
     }
 
 }

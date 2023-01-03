@@ -74,8 +74,12 @@ public class MessageProcessor implements Runnable{
                             if (heartbeat.getIsPingSet()) {
                                 heartbeat.setPongTrue();
                             } else {
-                                sendMessage("FAIL09 Pong without ping");
+                                sendMessage("FAIL05 Pong without ping");
                             }
+                        }
+                        case "TRANSFER" -> {
+                            responseManager.setServerResponse(new ServerResponseTransfer(this));
+                            responseManager.respond(receivedString);
                         }
                         default -> {
                             sendMessage("FAIL00 Unkown command");

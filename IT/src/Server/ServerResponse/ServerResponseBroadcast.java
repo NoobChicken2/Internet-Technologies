@@ -4,7 +4,7 @@ import GlobalUtilities.Utils;
 import Server.MessageProcessor;
 import Server.Server;
 
-public class ServerResponseBroadcast  implements ServerResponse{
+public class ServerResponseBroadcast implements ServerResponse{
     private MessageProcessor mp;
 
     public ServerResponseBroadcast(MessageProcessor mp) {

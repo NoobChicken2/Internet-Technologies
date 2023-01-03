@@ -2,6 +2,9 @@ package Client;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -11,6 +14,7 @@ public class Client {
     protected static boolean hasLoggedIn=false;
     protected static boolean survey=false;
     public static boolean pongAllowed = true;
+    protected static boolean transferRequest = false;
 
     static {
         try {
@@ -68,11 +72,23 @@ public class Client {
 
                 }
                 case 5-> {
+                    String userInput = "";
+                    System.out.print("Enter the username of the user you want to transfer a file: ");
+                    userInput = getUserInputString();
+                    System.out.println("Enter the name of the file that you want to transfer from the TransferUpload folder:");
+                    String fileName = getUserInputString();
+                    if (filePathFound(fileName)) {
+                        String pathString = getFullPathString(fileName);
+                        userInput += " " + pathString + " " + fileName + " " + getFileSizeBytes(pathString);
+                    }
+                    ListenOutputStream.command = "TRANSFER " + userInput;
+                }
+                case 6 -> {
                     ListenOutputStream.command="QUIT";
                     System.out.println("Goodbye!");
                     System.exit(0);
                 }
-                case 6 -> {
+                case 7 -> {
                     pongAllowed = !pongAllowed;
                 }
             }
@@ -87,7 +103,8 @@ public class Client {
                         2. Get List of all users
                         3. Private message
                         4. Start a survey
-                        5. QUIT
+                        5. Transfer a file
+                        6. QUIT
                         -------------------------------------------
                        """);
     }
@@ -132,5 +149,23 @@ public class Client {
             message=message+getUserInputString()+" ";
         }
         ListenOutputStream.command=message;
+    }
+    private static boolean filePathFound(String fileName) {
+        String file = new File("").getAbsolutePath() + "\\IT\\TransferUpload" + "\\" + fileName.trim();
+        File filePath = new File(file);
+        return filePath.exists();
+    }
+    private static String getFullPathString(String fileName){
+        return new File("").getAbsolutePath() + "\\IT\\TransferUpload" + "\\" + fileName.trim();
+    }
+    private static long getFileSizeBytes(String pathString){
+        Path path = Paths.get(pathString);
+        long bytes = 0;
+        try {
+            bytes = Files.size(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return bytes;
     }
 }

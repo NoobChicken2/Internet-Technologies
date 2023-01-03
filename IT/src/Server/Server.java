@@ -44,8 +44,9 @@ public class Server {
             }
         }
     }
+    // Gets the list of all clients connected except the client requesting the list
     public static String getClientList(String sendingClientName){
-        String result=" ";
+        String result="";
         for (MessageProcessor user : clients.values()) {
             if (!user.getName().equals(sendingClientName)) {
                 result = result + user.getName() + " ";
@@ -53,8 +54,15 @@ public class Server {
         }
         return result;
     }
-    public static void privateMessage(String client, String message){
+    // Gets the list of all current clients connected
+    public static String getClientList() {
+        String result="";
+        for (MessageProcessor user : clients.values()) {
+            result += user.getName() + " ";
+        }
+        return result;
+    }
+    public static void messageClient(String client, String message){
         clients.get(client).sendMessage(message);
     }
-
 }

@@ -77,18 +77,23 @@ public class ListenInputStream implements Runnable {
                         System.out.println("Currently available people to join your survey");
                         System.out.println(i+". "+response[i]);
                     }
+                }case "TRANSFER_OK" ->{
+                    System.out.println("The transfer request has been sent!");
+                }case "TRANSFER_REQ" -> {
+                    System.out.println(Utils.combinedMessage(1, response));
+                    Client.transferRequest = true;
                 }case "FAIL01" ->{
                     System.out.println("User already logged in");
                 }case "FAIL02" ->{
                     System.out.println("Username has an invalid format or length");
                 }case "FAIL03" ->{
                     System.out.println("Please log in first");
-                }case "FAIL04" ->{
+                }case "FAIL04" -> {
                     System.out.println("User cannot login twice");
-                }case "FAIL05" ->{
-                    System.out.println("Not enough users for survey");
-                }case "FAIL09" ->{
+                }case "FAIL05" -> {
                     System.out.println("Pong sent without receiving a ping");
+                }case "FAIL06", "FAIL10" ->{
+                    System.out.println(Utils.combinedMessage(1, response));
                 }case "FAIL00" ->{
                     System.out.println("invalid command");
                 }
