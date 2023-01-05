@@ -78,7 +78,11 @@ public class MessageProcessor implements Runnable{
                             }
                         }
                         case "TRANSFER" -> {
-                            responseManager.setServerResponse(new ServerResponseTransfer(this));
+                            responseManager.setServerResponse(new ServerFileTransfer(this));
+                            responseManager.respond(receivedString);
+                        }
+                        case "TRANSFER_RES" -> {
+                            responseManager.setServerResponse(new ServerFileTransferResponse(this));
                             responseManager.respond(receivedString);
                         }
                         default -> {

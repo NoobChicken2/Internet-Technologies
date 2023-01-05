@@ -24,7 +24,7 @@ public class ListenOutputStream implements Runnable {
         while(true) {
             String[] line = command.split(" ");
             switch (line[0]) {
-                case "IDENT", "BCST", "PONG", "QUIT", "LIST_REQUEST", "PRV_BCST", "SURVEY", "TRANSFER" -> {
+                case "IDENT", "BCST", "PONG", "QUIT", "LIST_REQUEST", "PRV_BCST", "SURVEY", "TRANSFER", "TRANSFER_RES" -> {
                     clientWriter.println(command);
                     clientWriter.flush();
                     command = "";

@@ -3,11 +3,11 @@ package Server.ServerResponse;
 import Server.MessageProcessor;
 import Server.Server;
 
-public class ServerResponseTransfer implements ServerResponse{
+public class ServerFileTransfer implements ServerResponse{
 
     private MessageProcessor messageProcessor;
 
-    public ServerResponseTransfer(MessageProcessor mp) {
+    public ServerFileTransfer(MessageProcessor mp) {
         this.messageProcessor = mp;
     }
 
@@ -47,10 +47,12 @@ public class ServerResponseTransfer implements ServerResponse{
         if (!(bytes % 1073741824 == bytes)) {
             gigaBytes = (int)bytes / 1073741824;
             bytesLeft = bytes % 1073741824;
+            bytes = bytesLeft;
         }
         if (!(bytes % 1048576 == bytes)) {
             megaBytes = (int)bytes / 1048576;
             bytesLeft = bytes % 1048576;
+            bytes = bytesLeft;
         }
         if (!(bytes % 1024 == bytes)) {
             kiloBytes = (int)bytes / 1024;

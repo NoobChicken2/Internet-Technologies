@@ -38,7 +38,8 @@ public class Client {
         }
         while (hasLoggedIn) {
             menu();
-            switch (getUserInput()) {
+            int menuValue = getUserInput();
+            switch (menuValue) {
                 case 1 -> {
                     System.out.print("Enter your message: ");
                     ListenOutputStream.command = "BCST " + getUserInputString();
@@ -75,7 +76,7 @@ public class Client {
                     String userInput = "";
                     System.out.print("Enter the username of the user you want to transfer a file: ");
                     userInput = getUserInputString();
-                    System.out.println("Enter the name of the file that you want to transfer from the TransferUpload folder:");
+                    System.out.print("Enter the name of the file that you want to transfer from the TransferUpload folder: ");
                     String fileName = getUserInputString();
                     if (filePathFound(fileName)) {
                         String pathString = getFullPathString(fileName);
@@ -90,6 +91,17 @@ public class Client {
                 }
                 case 7 -> {
                     pongAllowed = !pongAllowed;
+                }
+                case 9, 0 -> {
+                    if (!transferRequest) {
+                        System.out.println("You are not allowed to do this right now!");
+                        break;
+                    }
+                    if (menuValue == 9) {
+                        ListenOutputStream.command = "TRANSFER_RES accepted";
+                    } else {
+                        ListenOutputStream.command = "TRANSFER_RES declined";
+                    }
                 }
             }
         }
