@@ -13,8 +13,10 @@ public class Client {
     public static Socket socket;
     protected static boolean hasLoggedIn=false;
     protected static boolean survey=false;
-    public static boolean pongAllowed = true;
+    private static boolean pongAllowed = true;
     protected static boolean transferRequest = false;
+    private static String lastTransferRequestUser = "";
+
 
     static {
         try {
@@ -57,7 +59,7 @@ public class Client {
                 case 4 -> {
                     ListenOutputStream.command="SURVEY START";
                     Thread.sleep(1000);
-                    while (survey==true){
+                    while (survey){
                         Thread.sleep(1000);
                         sendQuestion();
                         System.out.println("Do you want to add a new Question?  1. Yes  |  2. No");
@@ -73,14 +75,14 @@ public class Client {
 
                 }
                 case 5-> {
-                    String userInput = "";
+                    String userInput;
                     System.out.print("Enter the username of the user you want to transfer a file: ");
                     userInput = getUserInputString();
                     System.out.print("Enter the name of the file that you want to transfer from the TransferUpload folder: ");
                     String fileName = getUserInputString();
                     if (filePathFound(fileName)) {
                         String pathString = getFullPathString(fileName);
-                        userInput += " " + pathString + " " + fileName + " " + getFileSizeBytes(pathString);
+                        userInput += " " + fileName + " " + getFileSizeBytes(pathString);
                     }
                     ListenOutputStream.command = "TRANSFER " + userInput;
                 }
@@ -98,10 +100,12 @@ public class Client {
                         break;
                     }
                     if (menuValue == 9) {
-                        ListenOutputStream.command = "TRANSFER_RES accepted";
+                        ListenOutputStream.command = "TRANSFER_RES accepted " + lastTransferRequestUser;
+                        System.out.println("You have accepted the file transfer. The download will start shortly.");
                     } else {
-                        ListenOutputStream.command = "TRANSFER_RES declined";
+                        ListenOutputStream.command = "TRANSFER_RES declined " + lastTransferRequestUser;
                     }
+                    lastTransferRequestUser = "";
                 }
             }
         }
@@ -179,5 +183,11 @@ public class Client {
             e.printStackTrace();
         }
         return bytes;
+    }
+    public static boolean getPongAllowed () {
+        return pongAllowed;
+    }
+    public static void setLastTransferRequestUser(String username) {
+        lastTransferRequestUser = username;
     }
 }

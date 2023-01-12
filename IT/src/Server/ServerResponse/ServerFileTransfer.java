@@ -13,19 +13,17 @@ public class ServerFileTransfer implements ServerResponse{
 
     @Override
     public void respond(String request) {
-        String[] response = request.split(" ");
-        if (!checkUsername(response[1])) {
-            messageProcessor.sendMessage("FAIL06 User was not found");
-            return;
+        String[] splitRequest = request.split(" ");
+        switch (splitRequest[0]) {
+            case "TRANSFER" -> {
+                // Request is when the sender client starts a file transfer
+                fileTransferRequest(splitRequest);
+            }
+            case "TRANSFER_RES" -> {
+                // Response is when the receiving client responds to the FT request
+                fileTransferResponse(splitRequest);
+            }
         }
-        if (response.length < 3) {
-            messageProcessor.sendMessage("FAIL10 Incorrect path");
-            return;
-        }
-        messageProcessor.sendMessage("TRANSFER_OK");
-
-        String notifyMessage = "TRANSFER_REQ The user " + messageProcessor.getName() + " wants to transfer a file to you named " + response[3] + " with the size " + getFileSize(Long.parseLong(response[4])) + ". Enter 9 to accept and 0 to decline!";
-        Server.messageClient(response[1].trim(), notifyMessage);
     }
 
     private boolean checkUsername(String username) {
@@ -39,7 +37,7 @@ public class ServerFileTransfer implements ServerResponse{
         }
         return usernameFound;
     }
-    private static String getFileSize(long bytes) {
+    private String getFileSize(long bytes) {
         int kiloBytes = 0;
         int megaBytes = 0;
         int gigaBytes = 0;
@@ -60,5 +58,29 @@ public class ServerFileTransfer implements ServerResponse{
         }
 
         return gigaBytes + " GB " + megaBytes + " MB " + kiloBytes + " KB " + bytesLeft + " B";
+    }
+    private void fileTransferRequest(String[] request) {
+        if (!checkUsername(request[1])) {
+            messageProcessor.sendMessage("FAIL06 User was not found");
+            return;
+        }
+        if (request.length < 3) {
+            messageProcessor.sendMessage("FAIL10 Incorrect path");
+            return;
+        }
+        messageProcessor.sendMessage("TRANSFER_OK");
+
+        String notifyMessage = "TRANSFER_REQ " + messageProcessor.getName() + " " + request[2] + " " + getFileSize(Long.parseLong(request[3]));
+        Server.messageClient(request[1].trim(), notifyMessage);
+    }
+    private void fileTransferResponse(String[] request) {
+        switch (request[1]) {
+            case "declined" -> {
+                Server.messageClient(request[2], "TRANSFER_DECLINED");
+            }
+            case "accepted" -> {
+                Server.messageClient(request[2], "TRANSFER_ACCEPTED");
+            }
+        }
     }
 }

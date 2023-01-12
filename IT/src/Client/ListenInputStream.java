@@ -9,7 +9,7 @@ import java.io.InputStreamReader;
 
 public class ListenInputStream implements Runnable {
 
-    public static InputStream inputServer() {
+    private InputStream inputServer() {
         InputStream input = null;
 
         try {
@@ -39,7 +39,7 @@ public class ListenInputStream implements Runnable {
             String[] response = serverResponse.split(" ");;
             switch (response[0]){
                 case "PING" ->{
-                    if (Client.pongAllowed) {
+                    if (Client.getPongAllowed()) {
                         ListenOutputStream.command = "PONG";
                     }
                 }case "QUIT_OK" ->{
@@ -80,8 +80,13 @@ public class ListenInputStream implements Runnable {
                 }case "TRANSFER_OK" ->{
                     System.out.println("The transfer request has been sent!");
                 }case "TRANSFER_REQ" -> {
-                    System.out.println(Utils.combinedMessage(1, response));
+                    System.out.println( "The user " + response[1] + " wants to transfer a file to you named " + response[2] + " with the size " + Utils.combinedMessage(3, response) + ". Enter 9 to accept and 0 to decline!");
                     Client.transferRequest = true;
+                    Client.setLastTransferRequestUser(response[1]);
+                }case "TRANSFER_DECLINED" -> {
+                    System.out.println("The user has declined the file transfer");
+                }case "TRANSFER_ACCEPTED" -> {
+                    System.out.println("The user has accepted the file transfer. The upload will start shortly.");
                 }case "FAIL01" ->{
                     System.out.println("User already logged in");
                 }case "FAIL02" ->{

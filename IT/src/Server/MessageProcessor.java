@@ -77,12 +77,8 @@ public class MessageProcessor implements Runnable{
                                 sendMessage("FAIL05 Pong without ping");
                             }
                         }
-                        case "TRANSFER" -> {
+                        case "TRANSFER", "TRANSFER_RES" -> {
                             responseManager.setServerResponse(new ServerFileTransfer(this));
-                            responseManager.respond(receivedString);
-                        }
-                        case "TRANSFER_RES" -> {
-                            responseManager.setServerResponse(new ServerFileTransferResponse(this));
                             responseManager.respond(receivedString);
                         }
                         default -> {
