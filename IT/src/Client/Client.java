@@ -1,10 +1,13 @@
 package Client;
 
+import GlobalUtilities.Utils;
+
 import java.io.*;
 import java.net.Socket;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.security.NoSuchAlgorithmException;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
@@ -29,7 +32,7 @@ public class Client {
     static Thread listenUser = new Thread(new ListenOutputStream());
     static Thread listenServer = new Thread(new ListenInputStream());
 
-    public static void main(String[] args) throws InterruptedException {
+    public static void main(String[] args) throws InterruptedException, NoSuchAlgorithmException, IOException {
         listenUser.start();
         listenServer.start();
         Thread.sleep(1000);
@@ -82,7 +85,7 @@ public class Client {
                     String fileName = getUserInputString();
                     if (filePathFound(fileName)) {
                         String pathString = getFullPathString(fileName);
-                        userInput += " " + fileName + " " + getFileSizeBytes(pathString);
+                        userInput += " " + fileName + " " + getFileSizeBytes(pathString) + " " + Utils.checksum(pathString);
                     }
                     ListenOutputStream.command = "TRANSFER " + userInput;
                 }
