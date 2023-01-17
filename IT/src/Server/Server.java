@@ -10,9 +10,10 @@ import java.util.Map;
 
 public class Server {
     private static final int SERVER_PORT = 8000;
+    private static final int SERVER_PORT_FT = 8080;
 
     public static Map<String, MessageProcessor> clients=new HashMap();
-    public static ServerSocket serverSocket;
+    private static ServerSocket serverSocket;
     static {
         try {
             serverSocket = new ServerSocket(SERVER_PORT);
@@ -20,6 +21,7 @@ public class Server {
             throw new RuntimeException(e);
         }
     }
+    private static ServerSocket fileTransferSocket;
 
     public static void main(String[] args) throws IOException {
         while (true) {
