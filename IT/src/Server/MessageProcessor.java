@@ -5,10 +5,10 @@ import Server.ServerResponse.ServerResponseSurvey;
 import Server.ServerResponse.Survey.Survey;
 
 import java.io.*;
+import java.net.ServerSocket;
 import java.net.Socket;
 
 public class MessageProcessor implements Runnable{
-    public Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
     protected String name;
@@ -16,8 +16,7 @@ public class MessageProcessor implements Runnable{
     protected Survey survey;
     private Thread clientHeartbeat;
 
-    public MessageProcessor(Socket socket, InputStream inputStream, OutputStream outputStream) {
-        this.socket = socket;
+    public MessageProcessor(InputStream inputStream, OutputStream outputStream) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
     }

@@ -13,17 +13,27 @@ import java.util.Scanner;
 
 public class Client {
 
-    public static Socket socket;
+    private static Socket socket;
+    private static Socket fileTransferSocket;
+
     protected static boolean hasLoggedIn=false;
     protected static boolean survey=false;
     private static boolean pongAllowed = true;
     protected static boolean transferRequest = false;
     private static String lastTransferRequestUser = "";
 
-
+    // Socket connection
     static {
         try {
             socket = new Socket("127.0.0.1", 8000);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
+    // File Transfer Socket connection
+    static {
+        try {
+            fileTransferSocket = new Socket("127.0.0.1", 8080);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }
@@ -127,7 +137,12 @@ public class Client {
                         -------------------------------------------
                        """);
     }
-
+    public static Socket getClientSocket() {
+        return socket;
+    }
+    public static Socket getClientFileTransferSocket() {
+        return fileTransferSocket;
+    }
     public static void login(){
         System.out.println("Please login as a client: ");
         ListenOutputStream.command = "IDENT " + getUserInputString();

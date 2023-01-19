@@ -9,7 +9,7 @@ public class ListenOutputStream implements Runnable {
         OutputStream output = null;
 
         try {
-            output = Client.socket.getOutputStream();
+            output = Client.getClientSocket().getOutputStream();
             return output;
         } catch (IOException e) {
             throw new RuntimeException(e);

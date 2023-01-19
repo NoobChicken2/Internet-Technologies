@@ -22,7 +22,13 @@ public class Server {
         }
     }
     private static ServerSocket fileTransferSocket;
-
+    static {
+        try {
+            fileTransferSocket = new ServerSocket(SERVER_PORT_FT);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+    }
     public static void main(String[] args) throws IOException {
         while (true) {
             // Wait for an incoming client-connection request (blocking).
@@ -33,7 +39,7 @@ public class Server {
             OutputStream outputStream = socket.getOutputStream();
 
             //creating the new client
-            MessageProcessor messageProcessor=new MessageProcessor(socket, inputStream, outputStream);
+            MessageProcessor messageProcessor=new MessageProcessor(inputStream, outputStream);
             Thread client = new Thread(messageProcessor);
             client.start();
             // TODO: Start a ping thread for each connecting client.
@@ -66,5 +72,8 @@ public class Server {
     }
     public static void messageClient(String client, String message){
         clients.get(client).sendMessage(message);
+    }
+    public static ServerSocket getFileTransferSocket() {
+        return fileTransferSocket;
     }
 }

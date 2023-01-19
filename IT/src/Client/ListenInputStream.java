@@ -9,17 +9,6 @@ import java.io.InputStreamReader;
 
 public class ListenInputStream implements Runnable {
 
-    private InputStream inputServer() {
-        InputStream input = null;
-
-        try {
-            input = Client.socket.getInputStream();
-            return input;
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
     @Override
     public void run() {
         BufferedReader serverReader = new BufferedReader(new InputStreamReader(inputServer()));
@@ -44,7 +33,7 @@ public class ListenInputStream implements Runnable {
                     }
                 }case "QUIT_OK" ->{
                     try {
-                        Client.socket.close();
+                        Client.getClientSocket().close();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
@@ -103,6 +92,16 @@ public class ListenInputStream implements Runnable {
                     System.out.println("invalid command");
                 }
             }
+        }
+    }
+    private InputStream inputServer() {
+        InputStream input = null;
+
+        try {
+            input = Client.getClientSocket().getInputStream();
+            return input;
+        } catch (IOException e) {
+            throw new RuntimeException(e);
         }
     }
 }
