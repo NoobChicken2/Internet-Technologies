@@ -37,6 +37,6 @@ public class ServerResponseQuit implements ServerResponse{
         mp.sendMessage(message);
         Server.broadcastMessage("DISCONNECTED " + mp.getName(), mp.getName());
         Server.clients.remove(mp.getName());
-        mp.socket.close();
+        mp.getSocket().close();
     }
 }

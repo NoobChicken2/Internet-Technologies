@@ -39,7 +39,7 @@ public class Server {
             OutputStream outputStream = socket.getOutputStream();
 
             //creating the new client
-            MessageProcessor messageProcessor=new MessageProcessor(inputStream, outputStream);
+            MessageProcessor messageProcessor=new MessageProcessor(socket, inputStream, outputStream);
             Thread client = new Thread(messageProcessor);
             client.start();
             // TODO: Start a ping thread for each connecting client.
