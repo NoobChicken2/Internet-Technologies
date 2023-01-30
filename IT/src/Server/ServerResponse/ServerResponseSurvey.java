@@ -60,13 +60,18 @@ public class ServerResponseSurvey implements ServerResponse {
                 mp.getSurvey().setParticipants(names);
                 mp.sendMessage("SURVEY_LIST_OK");
                 mp.getServer().broadcastMessageToListOfClients("SURVEY_EVENT "+mp.getName(),names);
-//                Timer surveyTimer = new Timer();
-//                TimerTask SendSummary = new TimerTask() {
-//                    @Override
-//                    public void run() {
-//                        //todo send the summary if not everyone has responded
-//                    }
-//                };
+                Timer surveyTimer = new Timer();
+                TimerTask SendSummary = new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (!mp.getSurvey().isFinished()){
+                            String respond=mp.getSurvey().getSummary();
+                            mp.getServer().broadcastMessageToListOfClients(respond,mp.getSurvey().getParticipants());
+                        }
+                    }
+                };
+
+                surveyTimer.schedule(SendSummary, 300000);
             }
 
         }

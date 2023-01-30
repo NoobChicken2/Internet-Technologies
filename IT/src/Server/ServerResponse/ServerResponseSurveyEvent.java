@@ -31,6 +31,7 @@ public class ServerResponseSurveyEvent implements ServerResponse{
 
         //Sending first question to participants
         if (request.startsWith("SURVEY_EVENT JOIN")){
+            sc.getSurvey().setRespondents();
             String[] response = request.split(" ");
             String nameCreator=response[2];
             sc=sc.getServer().getMessageProcessor(nameCreator);
@@ -52,18 +53,26 @@ public class ServerResponseSurveyEvent implements ServerResponse{
             String[] res = message.split(";");
 
             int qNumber=Integer.parseInt(res[1]);
-            Question q= sc.getSurvey().getQuestion(qNumber);
-            Answer a =q.getOneAnswer(res[0]);
+            if (qNumber<=sc.getSurvey().getQuestionNum()) {
+                Question q = sc.getSurvey().getQuestion(qNumber);
+                Answer a = q.getOneAnswer(res[0]);
 
-            a.setNumOfPeople();
-            Question nextQuestion=sc.getSurvey().getQuestion(qNumber+1);
-            String mes="SURVEY_EVENT Q "+nextQuestion.getQuestion()+";"+qNumber+1;
+                a.setNumOfPeople();
+                Question nextQuestion = sc.getSurvey().getQuestion(qNumber + 1);
+                String mes = "SURVEY_EVENT Q " + nextQuestion.getQuestion() + ";" + qNumber + 1;
 
-            ArrayList<Answer>answers=nextQuestion.getAnswers();
-            for (int i = 0; i < nextQuestion.getNumOfAnswers(); i++) {
-                mes=mes+";"+answers.get(i).getAnswer();
+                ArrayList<Answer> answers = nextQuestion.getAnswers();
+                for (int i = 0; i < nextQuestion.getNumOfAnswers(); i++) {
+                    mes = mes + ";" + answers.get(i).getAnswer();
+                }
+                sc.sendMessage(mes);
+            }else {
+                sc.getSurvey().getFinishedSurvey();
+                if (sc.getSurvey().checkLastRespondent()){
+                    String respond=sc.getSurvey().getSummary();
+                    mp.getServer().broadcastMessageToListOfClients(respond,sc.getSurvey().getParticipants());
+                }
             }
-            sc.sendMessage(mes);
         }
     }
 }
