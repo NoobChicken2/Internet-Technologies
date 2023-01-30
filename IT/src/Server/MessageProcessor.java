@@ -8,10 +8,15 @@ import java.io.*;
 import java.net.Socket;
 
 public class MessageProcessor implements Runnable{
+    // Socket variables
     private Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
+
+    // Name of the "MP"
     protected String name;
+
+    // State of the loop
     protected boolean exit=false;
     protected Survey survey;
     private Thread clientHeartbeat;
@@ -23,6 +28,7 @@ public class MessageProcessor implements Runnable{
     }
 
     public MessageProcessor() {
+
     }
 
     @Override

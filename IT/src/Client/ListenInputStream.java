@@ -1,11 +1,13 @@
 package Client;
 
 import GlobalUtilities.Utils;
+import Server.FileTransferThread;
 
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.sql.SQLOutput;
 
 public class ListenInputStream implements Runnable {
 
@@ -72,10 +74,16 @@ public class ListenInputStream implements Runnable {
                     System.out.println( "The user " + response[1] + " wants to transfer a file to you named " + response[2] + " with the size " + Utils.combinedMessage(3, response) + ". Enter 9 to accept and 0 to decline!");
                     Client.transferRequest = true;
                     Client.setLastTransferRequestUser(response[1]);
+                    Client.setLastTransferRequestFileName(response[2]);
                 }case "TRANSFER_DECLINED" -> {
                     System.out.println("The user has declined the file transfer");
                 }case "TRANSFER_ACCEPTED" -> {
-                    System.out.println("The user has accepted the file transfer. The upload will start shortly.");
+                    if (response[1].indexOf('U') != -1){
+                        System.out.println("The user has accepted the file transfer. The upload will start shortly.");
+                    } else {
+                        System.out.println("You have accepted the file transfer. The download will start shortly.");
+                    }
+                    new Thread(new FileTransferClientThread(response[1], response[2])).start();
                 }case "FAIL01" ->{
                     System.out.println("User already logged in");
                 }case "FAIL02" ->{

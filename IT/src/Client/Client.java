@@ -15,12 +15,14 @@ public class Client {
 
     private static Socket socket;
     private static Socket fileTransferSocket;
-
     protected static boolean hasLoggedIn=false;
     protected static boolean survey=false;
     private static boolean pongAllowed = true;
+
+    // Transfer request variables
     protected static boolean transferRequest = false;
     private static String lastTransferRequestUser = "";
+    private static String lastTransferRequestFileName = "";
 
     // Socket connection
     static {
@@ -43,6 +45,11 @@ public class Client {
     static Thread listenServer = new Thread(new ListenInputStream());
 
     public static void main(String[] args) throws InterruptedException, NoSuchAlgorithmException, IOException {
+//        Client c = new Client();
+//        c.init();
+//        //put everything below
+
+
         listenUser.start();
         listenServer.start();
         Thread.sleep(1000);
@@ -113,12 +120,11 @@ public class Client {
                         break;
                     }
                     if (menuValue == 9) {
-                        ListenOutputStream.command = "TRANSFER_RES accepted " + lastTransferRequestUser;
-                        System.out.println("You have accepted the file transfer. The download will start shortly.");
+                        ListenOutputStream.command = "TRANSFER_RES accepted " + lastTransferRequestUser + " " + lastTransferRequestFileName;
                     } else {
                         ListenOutputStream.command = "TRANSFER_RES declined " + lastTransferRequestUser;
                     }
-                    lastTransferRequestUser = "";
+                    resetFileTransferVariables();
                 }
             }
         }
@@ -186,6 +192,7 @@ public class Client {
     }
     private static boolean filePathFound(String fileName) {
         String file = new File("").getAbsolutePath() + "\\IT\\TransferUpload" + "\\" + fileName.trim();
+        System.out.println(file);
         File filePath = new File(file);
         return filePath.exists();
     }
@@ -207,5 +214,13 @@ public class Client {
     }
     public static void setLastTransferRequestUser(String username) {
         lastTransferRequestUser = username;
+    }
+    public static void setLastTransferRequestFileName(String fileName) {
+        lastTransferRequestFileName = fileName;
+    }
+    private static void resetFileTransferVariables() {
+        transferRequest = false;
+        lastTransferRequestUser = "";
+        lastTransferRequestFileName = "";
     }
 }

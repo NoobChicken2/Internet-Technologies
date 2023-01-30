@@ -5,21 +5,26 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Map;
 
-public class FileTransfer implements Runnable{
+public class FileTransferThread implements Runnable{
+    private static int fileTransferIdentifier = 0;
     private ServerSocket fileTransferSocket;
-
-    public FileTransfer() {
+    public Map<String, FileTransferClass> fileTransferRequests;
+    public FileTransferThread() {
         fileTransferSocket = Server.getFileTransferSocket();
     }
     @Override
     public void run() {
+        System.out.println("File transfer Socket Thread started");
         while (true) {
             Socket socket = getSocket();
 
             InputStream inputStream = getInputStream(socket);
             OutputStream outputStream = getOutputStream(socket);
 
+            FileTransferSession newSession = new FileTransferSession(inputStream, outputStream);
+            new Thread(newSession).start();
         }
     }
     private Socket getSocket() {
@@ -48,5 +53,9 @@ public class FileTransfer implements Runnable{
             throw new RuntimeException(e);
         }
         return outputStream;
+    }
+    public static int getNewIdentifier() {
+        fileTransferIdentifier ++;
+        return fileTransferIdentifier;
     }
 }

@@ -11,7 +11,6 @@ import java.util.Map;
 public class Server {
     private static final int SERVER_PORT = 8000;
     private static final int SERVER_PORT_FT = 8080;
-
     public static Map<String, MessageProcessor> clients=new HashMap();
     private static ServerSocket serverSocket;
     static {
@@ -30,6 +29,9 @@ public class Server {
         }
     }
     public static void main(String[] args) throws IOException {
+        // This starts the file transfer thread which listens to file transfer connections
+        new Thread(new FileTransferThread()).start();
+
         while (true) {
             // Wait for an incoming client-connection request (blocking).
             Socket socket = serverSocket.accept();
@@ -42,10 +44,9 @@ public class Server {
             MessageProcessor messageProcessor=new MessageProcessor(socket, inputStream, outputStream);
             Thread client = new Thread(messageProcessor);
             client.start();
-            // TODO: Start a ping thread for each connecting client.
         }
     }
-    public static void broadcastMessage(String message, String sendingClientName){
+    public static synchronized void broadcastMessage(String message, String sendingClientName){
         for (MessageProcessor user : clients.values()) {
             if (!user.getName().equals(sendingClientName)){
                 user.sendMessage(message);

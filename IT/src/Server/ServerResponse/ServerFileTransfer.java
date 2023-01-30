@@ -2,6 +2,7 @@ package Server.ServerResponse;
 
 import Server.MessageProcessor;
 import Server.Server;
+import Server.FileTransferThread;
 
 public class ServerFileTransfer implements ServerResponse{
 
@@ -79,7 +80,9 @@ public class ServerFileTransfer implements ServerResponse{
                 Server.messageClient(request[2], "TRANSFER_DECLINED");
             }
             case "accepted" -> {
-                Server.messageClient(request[2], "TRANSFER_ACCEPTED");
+                int identifier = FileTransferThread.getNewIdentifier();
+                Server.messageClient(request[2], "TRANSFER_ACCEPTED U" + identifier + " " + request[3]);
+                messageProcessor.sendMessage("TRANSFER_ACCEPTED D" + identifier + " " + request[3]);
             }
         }
     }
