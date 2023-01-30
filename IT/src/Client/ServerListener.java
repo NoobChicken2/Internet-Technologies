@@ -7,7 +7,16 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 
-public class ListenInputStream implements Runnable {
+public class ServerListener implements Runnable {
+
+    private final Client client;
+    private final ClientInputListener clientInputListener;
+
+    public ServerListener(Client client, ClientInputListener clientInputListener) {
+        this.client = client;
+        this.clientInputListener = clientInputListener;
+    }
+
 
     @Override
     public void run() {
@@ -17,7 +26,6 @@ public class ListenInputStream implements Runnable {
             String serverResponse = "";
             try {
                 serverResponse = serverReader.readLine();
-
                 if (serverResponse == null) {
                     System.out.println("You have timed out!");
                     System.exit(0);
@@ -28,19 +36,19 @@ public class ListenInputStream implements Runnable {
             String[] response = serverResponse.split(" ");;
             switch (response[0]){
                 case "PING" ->{
-                    if (Client.getPongAllowed()) {
-                        ListenOutputStream.command = "PONG";
+                    if (client.getPongAllowed()) {
+                        clientInputListener.setCommand("PONG");
                     }
                 }case "QUIT_OK" ->{
                     try {
-                        Client.getClientSocket().close();
+                        client.getClientSocket().close();
                     } catch (IOException e) {
                         throw new RuntimeException(e);
                     }
                 }case "INIT" ->{
                     System.out.println(serverResponse);
                 }case "IDENT_OK" ->{
-                    Client.hasLoggedIn=true;
+                    client.setHasLoggedIn(true);
                 }case "JOINED" ->{
                     System.out.println(response[1]+" joined the chat!");
                 }case "DISCONNECTED" ->{
@@ -58,9 +66,9 @@ public class ListenInputStream implements Runnable {
                 }case "PRV_BCST" ->{
                     System.out.println("PRIVATE< "+response[1]+": "+ Utils.combinedMessage(2, response)+" >");
                 }case "SURVEY_OK" ->{
-                    Client.survey=true;
+                    client.setSurvey(true);
                 }case "SURVEY_Q_OK" ->{
-                    Client.sendQuestion();
+                    client.sendQuestion();
                 }case "SURVEY_LIST" ->{
                     for (int i=1;i<response.length;i++){
                         System.out.println("Currently available people to join your survey");
@@ -70,8 +78,8 @@ public class ListenInputStream implements Runnable {
                     System.out.println("The transfer request has been sent!");
                 }case "TRANSFER_REQ" -> {
                     System.out.println( "The user " + response[1] + " wants to transfer a file to you named " + response[2] + " with the size " + Utils.combinedMessage(3, response) + ". Enter 9 to accept and 0 to decline!");
-                    Client.transferRequest = true;
-                    Client.setLastTransferRequestUser(response[1]);
+                    client.setTransferRequest(true);
+                    client.setLastTransferRequestUser(response[1]);
                 }case "TRANSFER_DECLINED" -> {
                     System.out.println("The user has declined the file transfer");
                 }case "TRANSFER_ACCEPTED" -> {
@@ -92,13 +100,13 @@ public class ListenInputStream implements Runnable {
                     System.out.println("invalid command");
                 }
             }
+            client.setWaitingResponse(false);
         }
     }
     private InputStream inputServer() {
-        InputStream input = null;
-
+        InputStream input;
         try {
-            input = Client.getClientSocket().getInputStream();
+            input = client.getClientSocket().getInputStream();
             return input;
         } catch (IOException e) {
             throw new RuntimeException(e);

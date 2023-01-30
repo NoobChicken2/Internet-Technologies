@@ -19,7 +19,20 @@ public class Question {
         return answers;
     }
 
+    public Answer getOneAnswer(String answer){
+        Answer result=new Answer();
+        for (int i = 0; i < answers.size(); i++) {
+            if (answer.equals(answers.get(i))){
+                result=answers.get(i);
+            }
+        }
+        return result;
+    }
+
     public void addAnswers(Answer answer) {
         this.answers.add(answer);
+    }
+    public int getNumOfAnswers(){
+        return answers.size();
     }
 }

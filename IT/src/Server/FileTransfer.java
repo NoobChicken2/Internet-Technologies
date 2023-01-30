@@ -9,8 +9,8 @@ import java.net.Socket;
 public class FileTransfer implements Runnable{
     private ServerSocket fileTransferSocket;
 
-    public FileTransfer() {
-        fileTransferSocket = Server.getFileTransferSocket();
+    public FileTransfer(ServerSocket fileTransferSocket) {
+        this.fileTransferSocket = fileTransferSocket;
     }
     @Override
     public void run() {

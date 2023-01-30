@@ -13,118 +13,123 @@ import java.util.Scanner;
 
 public class Client {
 
-    private static Socket socket;
-    private static Socket fileTransferSocket;
+    private Socket socket;
+    private Socket fileTransferSocket;
 
-    protected static boolean hasLoggedIn=false;
-    protected static boolean survey=false;
-    private static boolean pongAllowed = true;
-    protected static boolean transferRequest = false;
-    private static String lastTransferRequestUser = "";
+    protected boolean hasLoggedIn=false;
+    protected boolean survey=false;
+    private boolean pongAllowed = true;
+    protected boolean transferRequest = false;
+    private String lastTransferRequestUser = "";
 
-    // Socket connection
-    static {
+    private boolean waitingResponse = false;
+
+    private ClientInputListener clientInputListener;
+    private ServerListener serverListener;
+
+//
+//    // File Transfer Socket connection
+//    static {
+//        try {
+//            fileTransferSocket = new Socket("127.0.0.1", 8081);
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//    }
+
+    public void run () {
         try {
             socket = new Socket("127.0.0.1", 8000);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    // File Transfer Socket connection
-    static {
-        try {
-            fileTransferSocket = new Socket("127.0.0.1", 8080);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-
-    static Thread listenUser = new Thread(new ListenOutputStream());
-    static Thread listenServer = new Thread(new ListenInputStream());
-
-    public static void main(String[] args) throws InterruptedException, NoSuchAlgorithmException, IOException {
-        listenUser.start();
-        listenServer.start();
-        Thread.sleep(1000);
-
-        while (!hasLoggedIn){
-            login();
-            Thread.sleep(1000);
-        }
-        while (hasLoggedIn) {
-            menu();
-            int menuValue = getUserInput();
-            switch (menuValue) {
-                case 1 -> {
-                    System.out.print("Enter your message: ");
-                    ListenOutputStream.command = "BCST " + getUserInputString();
-                }
-                case 2 -> {
-                    ListenOutputStream.command = "LIST_REQUEST";
-                }
-                case 3 -> {
-                    System.out.print("Enter username you want to private message: ");
-                    String username = getUserInputString();
-                    System.out.print("Enter your message: ");
-                    String message = getUserInputString();
-                    ListenOutputStream.command="PRV_BCST "+ username+" "+message;
-                }
-                case 4 -> {
-                    ListenOutputStream.command="SURVEY START";
-                    Thread.sleep(1000);
-                    while (survey){
-                        Thread.sleep(1000);
-                        sendQuestion();
-                        System.out.println("Do you want to add a new Question?  1. Yes  |  2. No");
-                        int input =getUserInput();//todo prevent the bug from ansking the new question before user even responds
-                        if (input==1){
-                            sendQuestion();
-                        }else {
-                            ListenOutputStream.command="SURVEY Q_STOP";
-                            survey=false;//todo this is wrong for now !!!
-                        }
-                        Thread.sleep(1000);
-                    }
-
-                }
-                case 5-> {
-                    String userInput;
-                    System.out.print("Enter the username of the user you want to transfer a file: ");
-                    userInput = getUserInputString();
-                    System.out.print("Enter the name of the file that you want to transfer from the TransferUpload folder: ");
-                    String fileName = getUserInputString();
-                    if (filePathFound(fileName)) {
-                        String pathString = getFullPathString(fileName);
-                        userInput += " " + fileName + " " + getFileSizeBytes(pathString) + " " + Utils.checksum(pathString);
-                    }
-                    ListenOutputStream.command = "TRANSFER " + userInput;
-                }
-                case 6 -> {
-                    ListenOutputStream.command="QUIT";
-                    System.out.println("Goodbye!");
-                    System.exit(0);
-                }
-                case 7 -> {
-                    pongAllowed = !pongAllowed;
-                }
-                case 9, 0 -> {
-                    if (!transferRequest) {
-                        System.out.println("You are not allowed to do this right now!");
-                        break;
-                    }
-                    if (menuValue == 9) {
-                        ListenOutputStream.command = "TRANSFER_RES accepted " + lastTransferRequestUser;
-                        System.out.println("You have accepted the file transfer. The download will start shortly.");
-                    } else {
-                        ListenOutputStream.command = "TRANSFER_RES declined " + lastTransferRequestUser;
-                    }
-                    lastTransferRequestUser = "";
+            clientInputListener = new ClientInputListener(this);
+            serverListener = new ServerListener(this, clientInputListener);
+            Thread listenUser = new Thread(clientInputListener);
+            Thread listenServer = new Thread(serverListener);
+            listenServer.start();
+            listenUser.start();
+            while (!hasLoggedIn) {
+                if (!waitingResponse) {
+                    login();
                 }
             }
+            while (hasLoggedIn) {
+                menu();
+                int menuValue = getUserInput();
+                switch (menuValue) {
+                    case 1 -> {
+                        System.out.print("Enter your message: ");
+                        clientInputListener.setCommand("BCST " + getUserInputString());
+                    }
+                    case 2 -> {
+                        clientInputListener.setCommand("LIST_REQUEST");
+                    }
+                    case 3 -> {
+                        System.out.print("Enter username you want to private message: ");
+                        String username = getUserInputString();
+                        System.out.print("Enter your message: ");
+                        String message = getUserInputString();
+                        clientInputListener.setCommand("PRV_BCST " + username + " " + message);
+                    }
+                    case 4 -> {
+                        clientInputListener.setCommand("SURVEY START");
+                        while (survey) {
+                            sendQuestion();
+                            System.out.println("Do you want to add a new Question?  1. Yes  |  2. No");
+                            int input = getUserInput();//todo prevent the bug from ansking the new question before user even responds
+                            if (input == 1) {
+                                sendQuestion();
+                            } else {
+                                clientInputListener.setCommand("SURVEY Q_STOP");
+                                survey = false;//todo this is wrong for now !!!
+                            }
+                        }
+
+                    }
+                    case 5 -> {
+                        String userInput;
+                        System.out.print("Enter the username of the user you want to transfer a file: ");
+                        userInput = getUserInputString();
+                        System.out.print("Enter the name of the file that you want to transfer from the TransferUpload folder: ");
+                        String fileName = getUserInputString();
+                        if (filePathFound(fileName)) {
+                            String pathString = getFullPathString(fileName);
+                            userInput += " " + fileName + " " + getFileSizeBytes(pathString) + " " + Utils.checksum(pathString);
+                        }
+                        clientInputListener.setCommand("TRANSFER " + userInput);
+                    }
+                    case 6 -> {
+                        clientInputListener.setCommand("QUIT");
+                        System.out.println("Goodbye!");
+                        System.exit(0);
+                    }
+                    case 7 -> {
+                        pongAllowed = !pongAllowed;
+                    }
+                    case 9, 0 -> {
+                        if (!transferRequest) {
+                            System.out.println("You are not allowed to do this right now!");
+                            break;
+                        }
+                        if (menuValue == 9) {
+                            clientInputListener.setCommand("TRANSFER_RES accepted " + lastTransferRequestUser);
+                            System.out.println("You have accepted the file transfer. The download will start shortly.");
+                        } else {
+                            clientInputListener.setCommand("TRANSFER_RES declined " + lastTransferRequestUser);
+                        }
+                        lastTransferRequestUser = "";
+                    }
+                }
+//                clientInputListener.sendMessage();
+            }
+        } catch (IOException | NoSuchAlgorithmException e) {
+            throw new RuntimeException(e);
         }
     }
 
-    protected static void menu() {
+    public static void main(String[] args) {
+        new Client().run();
+    }
+
+    protected void menu() {
 
         System.out.println("""
                         -------------------------------------------
@@ -137,18 +142,18 @@ public class Client {
                         -------------------------------------------
                        """);
     }
-    public static Socket getClientSocket() {
+    public Socket getClientSocket() {
         return socket;
     }
-    public static Socket getClientFileTransferSocket() {
+    public Socket getClientFileTransferSocket() {
         return fileTransferSocket;
     }
-    public static void login(){
+    public void login(){
         System.out.println("Please login as a client: ");
-        ListenOutputStream.command = "IDENT " + getUserInputString();
+        clientInputListener.setCommand("IDENT " + getUserInputString());
+        waitingResponse = true;
     }
-    public static int getUserInput() {
-
+    public int getUserInput() {
         Scanner scanner;
         try {
             scanner = new Scanner(System.in);
@@ -158,7 +163,7 @@ public class Client {
             return -1;
         }
     }
-    public static String getUserInputString() {
+    public String getUserInputString() {
         Scanner scanner;
         try {
             scanner = new Scanner(System.in);
@@ -168,31 +173,32 @@ public class Client {
             return "";
         }
     }
-    public static void sendQuestion(){
+
+    public void sendQuestion(){
         String message="SURVEY Q ";
         System.out.println("Please enter your question:");
         message=message+getUserInputString()+" ";
         System.out.println("How many answers are in this question? (min:2/max:4)");
-        int numOfAns=Client.getUserInput();
+        int numOfAns= getUserInput();
         while (numOfAns<2||numOfAns>4){
             System.out.println("invalid number of answers enter number of answers again");
-            numOfAns=Client.getUserInput();
+            numOfAns= getUserInput();
         }
         for (int i=0;i<numOfAns;i++){
             System.out.println("enter your answer");
             message=message+getUserInputString()+" ";
         }
-        ListenOutputStream.command=message;
+        clientInputListener.setCommand(message);
     }
-    private static boolean filePathFound(String fileName) {
+    private boolean filePathFound(String fileName) {
         String file = new File("").getAbsolutePath() + "\\IT\\TransferUpload" + "\\" + fileName.trim();
         File filePath = new File(file);
         return filePath.exists();
     }
-    private static String getFullPathString(String fileName){
+    private String getFullPathString(String fileName){
         return new File("").getAbsolutePath() + "\\IT\\TransferUpload" + "\\" + fileName.trim();
     }
-    private static long getFileSizeBytes(String pathString){
+    private long getFileSizeBytes(String pathString){
         Path path = Paths.get(pathString);
         long bytes = 0;
         try {
@@ -202,10 +208,72 @@ public class Client {
         }
         return bytes;
     }
-    public static boolean getPongAllowed () {
+    public boolean getPongAllowed () {
         return pongAllowed;
     }
-    public static void setLastTransferRequestUser(String username) {
+    public void setLastTransferRequestUser(String username) {
         lastTransferRequestUser = username;
     }
+
+    public Socket getSocket() {
+        return socket;
+    }
+
+    public void setSocket(Socket socket) {
+        this.socket = socket;
+    }
+
+    public Socket getFileTransferSocket() {
+        return fileTransferSocket;
+    }
+
+    public void setFileTransferSocket(Socket fileTransferSocket) {
+        this.fileTransferSocket = fileTransferSocket;
+    }
+
+    public boolean isHasLoggedIn() {
+        return hasLoggedIn;
+    }
+
+    public boolean isWaitingResponse() {
+        return waitingResponse;
+    }
+
+    public void setWaitingResponse(boolean waitingResponse) {
+        this.waitingResponse = waitingResponse;
+    }
+
+
+    public void setHasLoggedIn(boolean hasLoggedIn) {
+        this.hasLoggedIn = hasLoggedIn;
+    }
+
+    public boolean isSurvey() {
+        return survey;
+    }
+
+    public void setSurvey(boolean survey) {
+        this.survey = survey;
+    }
+
+    public boolean isPongAllowed() {
+        return pongAllowed;
+    }
+
+    public void setPongAllowed(boolean pongAllowed) {
+        this.pongAllowed = pongAllowed;
+    }
+
+    public boolean isTransferRequest() {
+        return transferRequest;
+    }
+
+    public void setTransferRequest(boolean transferRequest) {
+        this.transferRequest = transferRequest;
+    }
+
+    public String getLastTransferRequestUser() {
+        return lastTransferRequestUser;
+    }
+
 }

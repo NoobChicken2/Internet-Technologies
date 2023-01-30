@@ -20,8 +20,8 @@ public class ServerResponseListRequest implements ServerResponse{
         }
     }
     private void getListOfClients(){
-        String message= "LIST_RESPONSE";
-        message=message+ Server.getClientList(mp.getName());
+        String message= "LIST_RESPONSE ";
+        message=message+ mp.getServer().getClientList(mp.getName());
         mp.sendMessage(message);
     }
 }

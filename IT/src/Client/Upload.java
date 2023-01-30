@@ -9,13 +9,13 @@ public class Upload implements Runnable{
 
     }
 
-    private InputStream fileTransferInputStream() {
-        InputStream inputStream;
-        try {
-            inputStream = Client.getClientFileTransferSocket().getInputStream();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return inputStream;
-    }
+//    private InputStream fileTransferInputStream() {
+//        InputStream inputStream;
+//        try {
+//            inputStream = Client.getClientFileTransferSocket().getInputStream();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        return inputStream;
+//    }
 }

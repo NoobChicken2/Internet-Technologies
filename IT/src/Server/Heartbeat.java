@@ -29,7 +29,6 @@ public class Heartbeat implements Runnable{
 
     @Override
     public void run() {
-
         if (SHOULD_PING) {
             Timer pingTimer = new Timer();
             // Ping Task
@@ -48,8 +47,7 @@ public class Heartbeat implements Runnable{
 
                     // Check if the pong is received after 3 seconds
                     if (!isPongReceived){
-                        String message = "DSCN Pong timeout";
-                        new ServerResponseQuit(messageProcessor).respond(message);
+                        new ServerResponseQuit(messageProcessor).respond("DSCN Pong timeout");
                         pingTimer.cancel();
                         pingTimer.purge();
                     }

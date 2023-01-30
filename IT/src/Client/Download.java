@@ -8,13 +8,13 @@ public class Download implements Runnable{
     public void run() {
 
     }
-    private OutputStream fileTransferOutputStream() {
-        OutputStream outputStream;
-        try {
-            outputStream = Client.getClientFileTransferSocket().getOutputStream();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-        return outputStream;
-    }
+//    private OutputStream fileTransferOutputStream() {
+//        OutputStream outputStream;
+//        try {
+//            outputStream = Client.getClientFileTransferSocket().getOutputStream();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+//        return outputStream;
+//    }
 }

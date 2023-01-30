@@ -33,7 +33,7 @@ public class ServerResponseLogin  implements ServerResponse{
             mp.sendMessage("FAIL04 User cannot login twice");
             return false;
         }
-        if (Server.clients.containsKey(clientName)){
+        if (mp.getServer().checkIfClientExists(clientName)){
             mp.sendMessage("FAIL01 User already logged in");
             return false;
         }
@@ -54,10 +54,10 @@ public class ServerResponseLogin  implements ServerResponse{
         return true;
     }
     private void register(String clientName){
-        Server.clients.put(clientName, mp);
+        mp.getServer().addClient(clientName,mp);
         mp.setName(clientName);
         String message = "IDENT_OK " + clientName;
         mp.sendMessage(message);
-        Server.broadcastMessage("JOINED " + clientName, mp.getName());
+        mp.getServer().broadcastMessageToEveryone("JOINED " + clientName, mp.getName());
     }
 }

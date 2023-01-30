@@ -26,6 +26,6 @@ public class ServerResponseBroadcast implements ServerResponse{
     private void broadcast(String BroadcastMessage){
         String message = "BCST_OK " + BroadcastMessage;
         mp.sendMessage(message);
-        Server.broadcastMessage("BCST " + mp.getName() + " " + BroadcastMessage, mp.getName());
+        mp.getServer().broadcastMessageToEveryone("BCST " + mp.getName() + " " + BroadcastMessage, mp.getName());
     }
 }

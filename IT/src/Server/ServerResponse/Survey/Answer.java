@@ -9,6 +9,10 @@ public class Answer {
         numOfPeople=0;
     }
 
+    public Answer() {
+        this.numOfPeople = 0;
+    }
+
     public String getAnswer() {
         return answer;
     }
@@ -17,7 +21,7 @@ public class Answer {
         return numOfPeople;
     }
 
-    public void setNumOfPeople(int numOfPeople) {
-        this.numOfPeople = numOfPeople;
+    public void setNumOfPeople() {
+        this.numOfPeople++;
     }
 }
