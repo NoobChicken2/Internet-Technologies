@@ -4,6 +4,8 @@ import Server.MessageProcessor;
 import Server.Server;
 import Server.FileTransferThread;
 
+import java.util.UUID;
+
 public class ServerFileTransfer implements ServerResponse{
 
     private MessageProcessor messageProcessor;
@@ -80,7 +82,8 @@ public class ServerFileTransfer implements ServerResponse{
                 Server.messageClient(request[2], "TRANSFER_DECLINED");
             }
             case "accepted" -> {
-                int identifier = FileTransferThread.getNewIdentifier();
+                UUID id = UUID.randomUUID();
+                String identifier = id.toString();
                 Server.messageClient(request[2], "TRANSFER_ACCEPTED U" + identifier + " " + request[3]);
                 messageProcessor.sendMessage("TRANSFER_ACCEPTED D" + identifier + " " + request[3]);
             }

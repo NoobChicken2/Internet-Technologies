@@ -5,12 +5,12 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.HashMap;
 import java.util.Map;
 
 public class FileTransferThread implements Runnable{
-    private static int fileTransferIdentifier = 0;
     private ServerSocket fileTransferSocket;
-    public Map<String, FileTransferClass> fileTransferRequests;
+    private Map<String, FileTransferSession> fileTransferRequests = new HashMap();
     public FileTransferThread() {
         fileTransferSocket = Server.getFileTransferSocket();
     }
@@ -23,7 +23,7 @@ public class FileTransferThread implements Runnable{
             InputStream inputStream = getInputStream(socket);
             OutputStream outputStream = getOutputStream(socket);
 
-            FileTransferSession newSession = new FileTransferSession(inputStream, outputStream);
+            FileTransferSession newSession = new FileTransferSession(this, inputStream, outputStream);
             new Thread(newSession).start();
         }
     }
@@ -54,8 +54,27 @@ public class FileTransferThread implements Runnable{
         }
         return outputStream;
     }
-    public static int getNewIdentifier() {
-        fileTransferIdentifier ++;
-        return fileTransferIdentifier;
+    public void addTransferRequest(String identifier, FileTransferSession session) {
+        fileTransferRequests.put(identifier, session);
+    }
+    public OutputStream getDownloaderOutputStream(String identifier) {
+        String downloaderIdentifier = "D" + identifier.substring(1);
+        OutputStream os = null;
+        for(String key: fileTransferRequests.keySet()){
+            if(key.equals(downloaderIdentifier)) {
+                os = fileTransferRequests.get(key).getOutputStream();
+            }
+        }
+        return os;
+    }
+    public InputStream getUploaderInputStream(String identifier) {
+        String uploaderIdentifier = "U" + identifier.substring(1);
+        InputStream is = null;
+        for(String key: fileTransferRequests.keySet()){
+            if(key.equals(uploaderIdentifier)) {
+                is = fileTransferRequests.get(key).getInputStream();
+            }
+        }
+        return is;
     }
 }

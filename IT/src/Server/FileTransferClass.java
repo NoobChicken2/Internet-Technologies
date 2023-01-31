@@ -5,9 +5,9 @@ public class FileTransferClass {
     private FileTransferSession downloader;
 
     public FileTransferClass(FileTransferSession session) {
-        if (session.getRole().equals("U")) {
+        if (session.getIdentifier().equals("U")) {
             this.uploader = session;
-        } else if (session.getRole().equals("D")) {
+        } else if (session.getIdentifier().equals("D")) {
             this.downloader = session;
         }
     }

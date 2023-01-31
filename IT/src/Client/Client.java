@@ -14,7 +14,6 @@ import java.util.Scanner;
 public class Client {
 
     private static Socket socket;
-    private static Socket fileTransferSocket;
     protected static boolean hasLoggedIn=false;
     protected static boolean survey=false;
     private static boolean pongAllowed = true;
@@ -33,13 +32,6 @@ public class Client {
         }
     }
     // File Transfer Socket connection
-    static {
-        try {
-            fileTransferSocket = new Socket("127.0.0.1", 8080);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
 
     static Thread listenUser = new Thread(new ListenOutputStream());
     static Thread listenServer = new Thread(new ListenInputStream());
@@ -145,9 +137,6 @@ public class Client {
     }
     public static Socket getClientSocket() {
         return socket;
-    }
-    public static Socket getClientFileTransferSocket() {
-        return fileTransferSocket;
     }
     public static void login(){
         System.out.println("Please login as a client: ");
