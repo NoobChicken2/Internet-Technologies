@@ -5,6 +5,10 @@ import Server.Server;
 import Server.ServerResponse.Survey.Answer;
 import Server.ServerResponse.Survey.Question;
 
+import java.util.ArrayList;
+import java.util.Timer;
+import java.util.TimerTask;
+
 
 public class ServerResponseSurvey implements ServerResponse {
     private MessageProcessor mp;
@@ -25,15 +29,17 @@ public class ServerResponseSurvey implements ServerResponse {
     }
     private void surveyProcessor(String request){
         System.out.println(request);
+
         //Starting the survey
         if (request.startsWith("SURVEY START")){
-            if (Server.clients.size()<3){
+            if (mp.getServer().getClientsHashMapSize()<3){
                 mp.sendMessage("FAIL05 Not enough users for survey");
             }else {
                 mp.sendMessage("SURVEY_OK");
                 mp.createSurvey();
             }
         }
+
         //Gathering the questions for the survey
         if (request.startsWith("SURVEY Q")){
             String[] req = request.split(" ");
@@ -41,15 +47,39 @@ public class ServerResponseSurvey implements ServerResponse {
                 addQuestion(req);
             }
         }
+
         //Sending Client List
         if (request.startsWith("SURVEY Q_STOP")){
-            mp.sendMessage("SURVEY_LIST "+ Server.getClientList(mp.getName()));
+            mp.sendMessage("SURVEY_LIST "+ mp.getServer().getClientList(mp.getName()));
+        }
+
+        //Receiving Client List for survey
+        if (request.startsWith("SURVEY LIST_RESPONSE")){
+            if (checkIfClientExists(request)){
+                ArrayList<String>names=getListOfClients(request);
+                mp.getSurvey().setParticipants(names);
+                mp.sendMessage("SURVEY_LIST_OK");
+                mp.getServer().broadcastMessageToListOfClients("SURVEY_EVENT "+mp.getName(),names);
+                Timer surveyTimer = new Timer();
+                TimerTask SendSummary = new TimerTask() {
+                    @Override
+                    public void run() {
+                        if (!mp.getSurvey().isFinished()){
+                            String respond=mp.getSurvey().getSummary();
+                            mp.getServer().broadcastMessageToListOfClients(respond,mp.getSurvey().getParticipants());
+                        }
+                    }
+                };
+
+                surveyTimer.schedule(SendSummary, 300000);
+            }
+
         }
     }
 
-    public boolean checkQuestion(String[] request){
+    private boolean checkQuestion(String[] request){
         if (mp.getSurvey().getQuestions().size()>10){
-            mp.sendMessage("SURVEY_LIST "+ Server.getClientList(mp.getName()));
+            mp.sendMessage("SURVEY_LIST "+ mp.getServer().getClientList(mp.getName()));
             return false;
         }
         if (request.length<5){
@@ -62,13 +92,31 @@ public class ServerResponseSurvey implements ServerResponse {
         }
         return true;
     }
+    private boolean checkIfClientExists(String request){
+        ArrayList<String>names=getListOfClients(request);
+        for (int i = 0; i <names.size() ; i++) {
+            if (!mp.getServer().checkIfClientExists(names.get(i))) {
+                mp.sendMessage("FAIL07 usernames are incorrect");
+                return false;
+            }
 
-    public void addQuestion(String[]req){
+        }
+        return true;
+    }
+    private void addQuestion(String[]req){
         Question q = new Question(req[1]);
         for (int i=2;i<req.length;i++){
             q.addAnswers(new Answer(req[i]));
         }
         mp.getSurvey().addQuestion(q);
         mp.sendMessage("SURVEY_Q_OK");
+    }
+    private ArrayList<String> getListOfClients(String request){
+        String[] response = request.split(" ");
+        ArrayList<String>names=new ArrayList<>();
+        for (int i = 2; i <names.size() ; i++) {
+            names.add(response[0]);
+        }
+        return names;
     }
 }

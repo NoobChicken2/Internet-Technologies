@@ -4,9 +4,6 @@ import Server.MessageProcessor;
 import Server.Server;
 
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
 
 public class ServerResponseQuit implements ServerResponse{
     private MessageProcessor mp;
@@ -15,11 +12,10 @@ public class ServerResponseQuit implements ServerResponse{
     }
 
     @Override
-    public void respond(String request) {
-        String[] quitType = request.split(" ");
+    public void respond(String message) {
         if (mp.checkClientLoggedIn()) {
             try {
-                quit(quitType[0]);
+                quit(message);
             } catch (IOException e) {
                 throw new RuntimeException(e);
             }
@@ -29,14 +25,10 @@ public class ServerResponseQuit implements ServerResponse{
         }
     }
 
-    private void quit(String quitType) throws IOException {
-        String message = "QUIT_OK";
-        if (quitType.equals("DSCN")) {
-            message = "DSCN";
-        }
+    private void quit(String message) throws IOException {
         mp.sendMessage(message);
-        Server.broadcastMessage("DISCONNECTED " + mp.getName(), mp.getName());
-        Server.clients.remove(mp.getName());
-        mp.getSocket().close();
+        mp.getServer().broadcastMessageToEveryone("DISCONNECTED " + mp.getName(), mp.getName());
+        mp.getServer().removeClient(mp.getName());
+        mp.socket.close();
     }
 }

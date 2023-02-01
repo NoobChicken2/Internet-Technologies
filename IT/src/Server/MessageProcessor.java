@@ -8,27 +8,26 @@ import java.io.*;
 import java.net.Socket;
 
 public class MessageProcessor implements Runnable{
-    // Socket variables
-    private Socket socket;
+//  ==================web sockets=================
+    private final Server server;
+    public Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
-
-    // Name of the "MP"
-    protected String name;
-
-    // State of the loop
-    protected boolean exit=false;
-    protected Survey survey;
+    private  PrintWriter sendMessage;
+    private BufferedReader readMessage;
+//  ===============================================
+    private String name;
+    private boolean exit=false;
+    private Survey survey;
     private Thread clientHeartbeat;
 
-    public MessageProcessor(Socket socket, InputStream inputStream, OutputStream outputStream) {
-        this.socket = socket;
+    public MessageProcessor(Server server,Socket socket, InputStream inputStream, OutputStream outputStream) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
-    }
-
-    public MessageProcessor() {
-
+        this.socket=socket;
+        this.sendMessage = new PrintWriter(outputStream);
+        this.readMessage = new BufferedReader(new InputStreamReader(inputStream));
+        this.server=server;
     }
 
     @Override
@@ -39,42 +38,36 @@ public class MessageProcessor implements Runnable{
         clientHeartbeat.start();
 
         sendMessage("INIT Yani/Klaus server!");
-        ServerResponseManager responseManager=new ServerResponseManager();
         while (!exit) {
             try {
                 // getting response from client
-                BufferedReader readMessage = new BufferedReader(new InputStreamReader(inputStream));
                 String receivedString=readMessage.readLine();
 
                 if (receivedString==null){
-                    sendMessage("FAIL00 Unkown command");
+                    new ServerResponseQuit(this).respond("QUIT_OK");
                 }else{
                     String[] response = receivedString.split(" ");
                     switch (response[0]){
                         case "IDENT" ->{
-                           // new ServerResponseLogin(this).respond(receivedString);
-                            responseManager.setServerResponse(new ServerResponseLogin(this));
-                            responseManager.respond(receivedString);
+                            new ServerResponseLogin(this).respond(receivedString);
                         }
                         case "QUIT" ->{
-                            responseManager.setServerResponse(new ServerResponseQuit(this));
-                            responseManager.respond(receivedString);
+                            new ServerResponseQuit(this).respond("QUIT_OK");
                         }
                         case "BCST" ->{
-                            responseManager.setServerResponse(new ServerResponseBroadcast(this));
-                            responseManager.respond(receivedString);
+                            new ServerResponseBroadcast(this).respond(receivedString);
                         }
                         case "LIST_REQUEST" ->{
-                            responseManager.setServerResponse(new ServerResponseListRequest(this));
-                            responseManager.respond(receivedString);
+                            new ServerResponseListRequest(this).respond(receivedString);
                         }
                         case "PRV_BCST" ->{
-                            responseManager.setServerResponse(new ServerResponsePrivateMessage(this));
-                            responseManager.respond(receivedString);
+                            new ServerResponsePrivateMessage(this).respond(receivedString);
                         }
                         case "SURVEY" ->{
-                            responseManager.setServerResponse(new ServerResponseSurvey(this));
-                            responseManager.respond(receivedString);
+                            new ServerResponseSurvey(this).respond(receivedString);
+                        }
+                        case "SURVEY_EVENT" ->{
+                            new ServerResponseSurveyEvent(this).respond(receivedString);
                         }
                         case "PONG" -> {
                             if (heartbeat.getIsPingSet()) {
@@ -84,8 +77,7 @@ public class MessageProcessor implements Runnable{
                             }
                         }
                         case "TRANSFER", "TRANSFER_RES" -> {
-                            responseManager.setServerResponse(new ServerFileTransfer(this));
-                            responseManager.respond(receivedString);
+                            new ServerFileTransfer(this).respond(receivedString);
                         }
                         default -> {
                             sendMessage("FAIL00 Unkown command");
@@ -106,7 +98,6 @@ public class MessageProcessor implements Runnable{
         return true;
     }
     public void sendMessage(String message) {
-        PrintWriter sendMessage = new PrintWriter(outputStream);
         sendMessage.println(message);
         sendMessage.flush();
     }
@@ -130,7 +121,7 @@ public class MessageProcessor implements Runnable{
             clientHeartbeat.interrupt();
         }
     }
-    public Socket getSocket() {
-        return socket;
+    public Server getServer() {
+        return server;
     }
 }

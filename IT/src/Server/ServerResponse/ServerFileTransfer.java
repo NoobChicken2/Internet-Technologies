@@ -30,15 +30,7 @@ public class ServerFileTransfer implements ServerResponse{
     }
 
     private boolean checkUsername(String username) {
-        String[] users = Server.getClientList(messageProcessor.getName()).split(" ");
-        boolean usernameFound = false;
-        for (String user : users) {
-            if (username.trim().equals(user)) {
-                usernameFound = true;
-                break;
-            }
-        }
-        return usernameFound;
+        return messageProcessor.getServer().checkIfClientExists(username);
     }
     private String getFileSize(long bytes) {
         int kiloBytes = 0;
@@ -74,14 +66,15 @@ public class ServerFileTransfer implements ServerResponse{
         messageProcessor.sendMessage("TRANSFER_OK");
 
         String notifyMessage = "TRANSFER_REQ " + messageProcessor.getName() + " " + request[2] + " " + getFileSize(Long.parseLong(request[3]));
-        Server.messageClient(request[1].trim(), notifyMessage);
+        messageProcessor.getServer().messageClient(request[1].trim(), notifyMessage);
     }
     private void fileTransferResponse(String[] request) {
         switch (request[1]) {
             case "declined" -> {
-                Server.messageClient(request[2], "TRANSFER_DECLINED");
+                messageProcessor.getServer().messageClient(request[2], "TRANSFER_DECLINED");
             }
             case "accepted" -> {
+                messageProcessor.getServer().messageClient(request[2], "TRANSFER_ACCEPTED");
                 UUID id = UUID.randomUUID();
                 String identifier = id.toString();
                 Server.messageClient(request[2], "TRANSFER_ACCEPTED U" + identifier + " " + request[3]);

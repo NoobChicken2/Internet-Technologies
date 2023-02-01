@@ -5,33 +5,29 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 
 public class Server {
-    private static final int SERVER_PORT = 8000;
-    private static final int SERVER_PORT_FT = 8080;
-    public static Map<String, MessageProcessor> clients=new HashMap();
-    private static ServerSocket serverSocket;
-    static {
-        try {
-            serverSocket = new ServerSocket(SERVER_PORT);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    private static ServerSocket fileTransferSocket;
-    static {
-        try {
-            fileTransferSocket = new ServerSocket(SERVER_PORT_FT);
-        } catch (IOException e) {
-            throw new RuntimeException(e);
-        }
-    }
-    public static void main(String[] args) throws IOException {
-        // This starts the file transfer thread which listens to file transfer connections
-        new Thread(new FileTransferThread()).start();
+    private final int SERVER_PORT = 8000;
+    private final int SERVER_PORT_FT = 8081;
+    private Map<String, MessageProcessor> clients;
+    private ServerSocket serverSocket;
+    private ServerSocket fileTransferSocket;
 
+    public Server() throws IOException {
+        clients=new HashMap();
+        serverSocket = new ServerSocket(SERVER_PORT);
+        fileTransferSocket = new ServerSocket(SERVER_PORT_FT);
+    }
+
+    public static void main(String[] args) throws IOException {
+        Server server=new Server();
+        server.run();
+    }
+
+    private void run() throws IOException {
         while (true) {
             // Wait for an incoming client-connection request (blocking).
             Socket socket = serverSocket.accept();
@@ -41,20 +37,26 @@ public class Server {
             OutputStream outputStream = socket.getOutputStream();
 
             //creating the new client
-            MessageProcessor messageProcessor=new MessageProcessor(socket, inputStream, outputStream);
+            MessageProcessor messageProcessor=new MessageProcessor(this,socket,inputStream, outputStream);
             Thread client = new Thread(messageProcessor);
             client.start();
         }
     }
-    public static synchronized void broadcastMessage(String message, String sendingClientName){
+
+    public synchronized void broadcastMessageToEveryone(String message, String sendingClientName){
         for (MessageProcessor user : clients.values()) {
             if (!user.getName().equals(sendingClientName)){
                 user.sendMessage(message);
             }
         }
     }
+    public void broadcastMessageToListOfClients(String message, ArrayList<String>clientList){
+        for (String user : clientList) {
+            clients.get(user).sendMessage(message);
+        }
+    }
     // Gets the list of all clients connected except the client requesting the list
-    public static String getClientList(String sendingClientName){
+    public String getClientList(String sendingClientName){
         String result="";
         for (MessageProcessor user : clients.values()) {
             if (!user.getName().equals(sendingClientName)) {
@@ -63,18 +65,26 @@ public class Server {
         }
         return result;
     }
-    // Gets the list of all current clients connected
-    public static String getClientList() {
-        String result="";
-        for (MessageProcessor user : clients.values()) {
-            result += user.getName() + " ";
-        }
-        return result;
-    }
-    public static void messageClient(String client, String message){
+    public void messageClient(String client, String message){
         clients.get(client).sendMessage(message);
     }
-    public static ServerSocket getFileTransferSocket() {
-        return fileTransferSocket;
+    public int getClientsHashMapSize() {
+        return clients.size();
+    }
+    public void addClient(String clientName, MessageProcessor mp) {
+        clients.put(clientName, mp);
+    }
+    public void removeClient(String clientName) {
+        clients.remove(clientName);
+    }
+    public boolean checkIfClientExists(String clientName) {
+        if (clients.containsKey(clientName)){
+            return true;
+        }else {
+            return false;
+        }
+    }
+    public MessageProcessor getMessageProcessor(String name){
+        return clients.get(name);
     }
 }
