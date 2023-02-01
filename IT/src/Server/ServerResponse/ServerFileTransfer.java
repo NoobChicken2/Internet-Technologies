@@ -29,8 +29,12 @@ public class ServerFileTransfer implements ServerResponse{
         }
     }
 
-    private boolean checkUsername(String username) {
-        return messageProcessor.getServer().checkIfClientExists(username);
+    private boolean checkUsername(String username, String messageProcessorName) {
+        if (messageProcessorName.equals(username)) {
+            return false;
+        } else {
+            return messageProcessor.getServer().checkIfClientExists(username);
+        }
     }
     private String getFileSize(long bytes) {
         int kiloBytes = 0;
@@ -55,7 +59,7 @@ public class ServerFileTransfer implements ServerResponse{
         return gigaBytes + " GB " + megaBytes + " MB " + kiloBytes + " KB " + bytesLeft + " B";
     }
     private void fileTransferRequest(String[] request) {
-        if (!checkUsername(request[1])) {
+        if (!checkUsername(request[1], messageProcessor.getName())) {
             messageProcessor.sendMessage("FAIL06 User was not found");
             return;
         }
@@ -74,10 +78,9 @@ public class ServerFileTransfer implements ServerResponse{
                 messageProcessor.getServer().messageClient(request[2], "TRANSFER_DECLINED");
             }
             case "accepted" -> {
-                messageProcessor.getServer().messageClient(request[2], "TRANSFER_ACCEPTED");
                 UUID id = UUID.randomUUID();
                 String identifier = id.toString();
-                Server.messageClient(request[2], "TRANSFER_ACCEPTED U" + identifier + " " + request[3]);
+                messageProcessor.getServer().messageClient(request[2], "TRANSFER_ACCEPTED U" + identifier + " " + request[3]);
                 messageProcessor.sendMessage("TRANSFER_ACCEPTED D" + identifier + " " + request[3]);
             }
         }

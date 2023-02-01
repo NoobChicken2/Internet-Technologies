@@ -6,14 +6,14 @@ import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.Map;
 
 public class FileTransferThread implements Runnable{
-    private ServerSocket fileTransferSocket;
+    private final int SERVER_PORT_FT = 8081;
+    private ServerSocket fileTransferSocket = openFileTransferSocket();
     private Map<String, FileTransferSession> fileTransferRequests = new HashMap();
-    public FileTransferThread() {
-        fileTransferSocket = Server.getFileTransferSocket();
-    }
+
     @Override
     public void run() {
         System.out.println("File transfer Socket Thread started");
@@ -23,7 +23,7 @@ public class FileTransferThread implements Runnable{
             InputStream inputStream = getInputStream(socket);
             OutputStream outputStream = getOutputStream(socket);
 
-            FileTransferSession newSession = new FileTransferSession(this, inputStream, outputStream);
+            FileTransferSession newSession = new FileTransferSession(this, inputStream, outputStream, socket);
             new Thread(newSession).start();
         }
     }
@@ -73,8 +73,30 @@ public class FileTransferThread implements Runnable{
         for(String key: fileTransferRequests.keySet()){
             if(key.equals(uploaderIdentifier)) {
                 is = fileTransferRequests.get(key).getInputStream();
+                System.out.println("Uploader found");
+            }
+        }
+        System.out.println("Out of for loop");
+        if (is == null) {
+            for(String key:fileTransferRequests.keySet()) {
+                System.out.println(key);
             }
         }
         return is;
+    }
+    private ServerSocket openFileTransferSocket() {
+        ServerSocket socket;
+        try {
+            socket = new ServerSocket(SERVER_PORT_FT);
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return socket;
+    }
+    public void removeFileTransferRequest(String identifier) {
+        fileTransferRequests.remove(identifier);
+    }
+    public Map<String, FileTransferSession> getMap() {
+        return fileTransferRequests;
     }
 }

@@ -11,15 +11,12 @@ import java.util.Map;
 
 public class Server {
     private final int SERVER_PORT = 8000;
-    private final int SERVER_PORT_FT = 8081;
     private Map<String, MessageProcessor> clients;
     private ServerSocket serverSocket;
-    private ServerSocket fileTransferSocket;
 
     public Server() throws IOException {
         clients=new HashMap();
         serverSocket = new ServerSocket(SERVER_PORT);
-        fileTransferSocket = new ServerSocket(SERVER_PORT_FT);
     }
 
     public static void main(String[] args) throws IOException {
@@ -28,6 +25,9 @@ public class Server {
     }
 
     private void run() throws IOException {
+        // This starts the file transfer thread which listens to file transfer connections
+        new Thread(new FileTransferThread()).start();
+
         while (true) {
             // Wait for an incoming client-connection request (blocking).
             Socket socket = serverSocket.accept();

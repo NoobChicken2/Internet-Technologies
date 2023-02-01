@@ -3,23 +3,43 @@ package Server;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
+import java.net.Socket;
 
 public class FileTransferSession implements Runnable{
-
+    private Socket socket;
     private FileTransferThread fileTransferThreadInstance;
     private InputStream inputStream;
     private OutputStream outputStream;
     private String identifier;
 
-    public FileTransferSession(FileTransferThread instance, InputStream inputStream, OutputStream outputStream) {
+    public FileTransferSession(FileTransferThread instance, InputStream inputStream, OutputStream outputStream, Socket socket) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
         this.fileTransferThreadInstance = instance;
+        this.socket = socket;
     }
 
     @Override
     public void run() {
         // Identify
+        identifyFirstBytes();
+
+        // Run depending on identifier
+        if (identifier.indexOf('U') != -1) {
+            upload();
+        } else if (identifier.indexOf('D') != -1) {
+            download();
+        }
+        fileTransferThreadInstance.removeFileTransferRequest(identifier);
+
+        // Close socket connection after the upload or download
+//        try {
+//            socket.close();
+//        } catch (IOException e) {
+//            throw new RuntimeException(e);
+//        }
+    }
+    private void identifyFirstBytes() {
         try {
             byte[] inputBytes = new byte[37];
             inputStream.readNBytes(inputBytes,0,inputBytes.length);
@@ -27,13 +47,6 @@ public class FileTransferSession implements Runnable{
             fileTransferThreadInstance.addTransferRequest(identifier, this);
         } catch (IOException e) {
             throw new RuntimeException(e);
-        }
-
-        // Run depending on identifier
-        if (identifier.indexOf('U') != -1) {
-            upload();
-        } else if (identifier.indexOf('D') != -1) {
-            download();
         }
     }
     private void upload() {

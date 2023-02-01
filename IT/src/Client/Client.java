@@ -21,21 +21,10 @@ public class Client {
     private boolean pongAllowed = true;
     protected boolean transferRequest = false;
     private String lastTransferRequestUser = "";
-
+    private String lastTransferRequestFileName = "";
     private boolean waitingResponse = false;
-
     private ClientInputListener clientInputListener;
     private ServerListener serverListener;
-
-//
-//    // File Transfer Socket connection
-//    static {
-//        try {
-//            fileTransferSocket = new Socket("127.0.0.1", 8081);
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
-//    }
 
     public void run () {
         try {
@@ -110,12 +99,13 @@ public class Client {
                             break;
                         }
                         if (menuValue == 9) {
-                            clientInputListener.setCommand("TRANSFER_RES accepted " + lastTransferRequestUser);
+                            clientInputListener.setCommand("TRANSFER_RES accepted " + lastTransferRequestUser + " " + lastTransferRequestFileName);
                             System.out.println("You have accepted the file transfer. The download will start shortly.");
                         } else {
                             clientInputListener.setCommand("TRANSFER_RES declined " + lastTransferRequestUser);
                         }
                         lastTransferRequestUser = "";
+                        lastTransferRequestFileName = "";
                     }
                 }
 //                clientInputListener.sendMessage();
@@ -213,6 +203,9 @@ public class Client {
     }
     public void setLastTransferRequestUser(String username) {
         lastTransferRequestUser = username;
+    }
+    public void setLastTransferRequestFileName(String fileName) {
+        lastTransferRequestFileName = fileName;
     }
 
     public Socket getSocket() {

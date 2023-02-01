@@ -47,13 +47,14 @@ public class FileTransferClientThread implements Runnable{
         return outputStream;
     }
     private String getDownloadPath() {
-        return new File("").getAbsolutePath() + "\\IT\\TransferDownload\\" + fileName + " " + identifier;
+        return new File("").getAbsolutePath() + "\\IT\\TransferDownload\\" + fileName.split("\\.")[0] + " " + identifier + "." + fileName.split("\\.")[1];
     }
     private String getUploadPath() {
         return new File("").getAbsolutePath() + "\\IT\\TransferUpload\\" + fileName;
     }
     private void upload() {
         System.out.println("I am uploading");
+        System.out.println(identifier);
         FileInputStream in;
 
         try {
@@ -67,6 +68,7 @@ public class FileTransferClientThread implements Runnable{
     }
     private void download() {
         System.out.println("I am downloading");
+        System.out.println(identifier);
         FileOutputStream os;
 
         try {
@@ -82,7 +84,7 @@ public class FileTransferClientThread implements Runnable{
     private Socket connectSocket() {
         Socket socket;
         try {
-            socket = new Socket("127.0.0.1", 8080);
+            socket = new Socket("127.0.0.1", 8081);
         } catch (IOException e) {
             throw new RuntimeException(e);
         }

@@ -81,7 +81,7 @@ public class ServerListener implements Runnable {
                     System.out.println( "The user " + response[1] + " wants to transfer a file to you named " + response[2] + " with the size " + Utils.combinedMessage(3, response) + ". Enter 9 to accept and 0 to decline!");
                     client.setTransferRequest(true);
                     client.setLastTransferRequestUser(response[1]);
-                    Client.setLastTransferRequestFileName(response[2]);
+                    client.setLastTransferRequestFileName(response[2]);
                 }case "TRANSFER_DECLINED" -> {
                     System.out.println("The user has declined the file transfer");
                 }case "TRANSFER_ACCEPTED" -> {
