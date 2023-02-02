@@ -1,4 +1,4 @@
-package Server.ServerResponse.Survey;
+package Server.Survey;
 
 import java.util.ArrayList;
 

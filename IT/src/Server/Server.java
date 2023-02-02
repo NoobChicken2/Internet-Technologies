@@ -10,11 +10,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class Server {
-    private final int SERVER_PORT = 8000;
-    private final int SERVER_PORT_FT = 8081;
-    private Map<String, MessageProcessor> clients;
     private ServerSocket serverSocket;
+    private final int SERVER_PORT = 3000;
+    private Map<String, MessageProcessor> clients;
     private ServerSocket fileTransferSocket;
+    private final int SERVER_PORT_FT = 8081;
 
     public Server() throws IOException {
         clients=new HashMap();
@@ -23,8 +23,7 @@ public class Server {
     }
 
     public static void main(String[] args) throws IOException {
-        Server server=new Server();
-        server.run();
+        new Server().run();
     }
 
     private void run() throws IOException {

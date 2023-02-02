@@ -2,7 +2,8 @@ package Server;
 
 import Server.ServerResponse.*;
 import Server.ServerResponse.ServerResponseSurvey;
-import Server.ServerResponse.Survey.Survey;
+import Server.Survey.Survey;
+import Server.Utils.ServerUtils;
 
 import java.io.*;
 import java.net.Socket;

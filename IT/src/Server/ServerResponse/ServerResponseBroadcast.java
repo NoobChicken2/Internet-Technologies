@@ -1,8 +1,8 @@
 package Server.ServerResponse;
 
-import GlobalUtilities.Utils;
 import Server.MessageProcessor;
-import Server.Server;
+import Server.Utils.ServerUtils;
+
 
 public class ServerResponseBroadcast implements ServerResponse{
     private MessageProcessor mp;
@@ -18,7 +18,7 @@ public class ServerResponseBroadcast implements ServerResponse{
             mp.sendMessage("FAIL00 Unkown command");
         }else {
             if (mp.checkClientLoggedIn()) {
-                broadcast(Utils.combinedMessage(1, response));
+                broadcast(ServerUtils.combinedMessage(1, response));
             }
         }
 

@@ -1,9 +1,8 @@
 package Server.ServerResponse;
 
 import Server.MessageProcessor;
-import Server.Server;
-import Server.ServerResponse.Survey.Answer;
-import Server.ServerResponse.Survey.Question;
+import Server.Survey.Answer;
+import Server.Survey.Question;
 
 import java.util.ArrayList;
 
