@@ -41,7 +41,7 @@ public class ServerResponseSurvey implements ServerResponse {
 
         //Gathering the questions for the survey
         if (request.startsWith("SURVEY Q")){
-            String[] req = request.split(" ");
+            String[] req = request.split("/");
             if (checkQuestion(req)) {
                 addQuestion(req);
             }
@@ -75,17 +75,12 @@ public class ServerResponseSurvey implements ServerResponse {
 
         }
     }
-
     private boolean checkQuestion(String[] request){
         if (mp.getSurvey().getQuestions().size()>10){
             mp.sendMessage("SURVEY_LIST "+ mp.getServer().getClientList(mp.getName()));
             return false;
         }
-        if (request.length<5){
-            mp.sendMessage("FAIL06 Invalid question or wrong number of answers");
-            return false;
-        }
-        if (request.length>7){
+        if (request.length<4 || request.length>6){
             mp.sendMessage("FAIL06 Invalid question or wrong number of answers");
             return false;
         }
@@ -111,10 +106,10 @@ public class ServerResponseSurvey implements ServerResponse {
         mp.sendMessage("SURVEY_Q_OK");
     }
     private ArrayList<String> getListOfClients(String request){
-        String[] response = request.split(" ");
+        String[] response = request.split("/");
         ArrayList<String>names=new ArrayList<>();
-        for (int i = 2; i <names.size() ; i++) {
-            names.add(response[0]);
+        for (int i = 1; i <response.length ; i++) {
+            names.add(response[i]);
         }
         return names;
     }

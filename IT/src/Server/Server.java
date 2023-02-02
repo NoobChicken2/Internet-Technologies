@@ -49,7 +49,7 @@ public class Server {
             }
         }
     }
-    public void broadcastMessageToListOfClients(String message, ArrayList<String>clientList){
+    public synchronized void broadcastMessageToListOfClients(String message, ArrayList<String>clientList){
         for (String user : clientList) {
             clients.get(user).sendMessage(message);
         }

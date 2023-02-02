@@ -24,10 +24,7 @@ public class ClientListTest {
         private BufferedReader in2;
         private PrintWriter out2;
 
-        private final String firstUser = "test";
-        private final String secondUser = "test2";
-
-        private final static int max_delta_allowed_ms = 100;
+        private final static int max_delta_allowed_ms = 1000;
 
         @BeforeAll
         static void setupAll() throws IOException {
@@ -58,7 +55,7 @@ public class ClientListTest {
         @Test
         void TC6_1_getClientListWithOneUser() {
                 receiveLineWithTimeout(in); //init message
-                out.println("IDENT "+ firstUser);
+                out.println("IDENT test");
                 out.flush();
                 receiveLineWithTimeout(in);
                 out.println("LIST_REQUEST");

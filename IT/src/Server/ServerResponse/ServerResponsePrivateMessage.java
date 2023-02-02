@@ -21,9 +21,13 @@ public class ServerResponsePrivateMessage implements ServerResponse{
     }
 
     private void sendPrivateMessage(String receiver, String privateMessage) {
-        mp.sendMessage("PRV_BCST_OK "+ privateMessage);
-        String message = "PRV_BCST " + mp.getName() + " " + privateMessage;
-        mp.getServer().messageClient(receiver, message);
+        if (mp.getServer().checkIfClientExists(receiver)) {
+            mp.sendMessage("PRV_BCST_OK " + privateMessage);
+            String message = "PRV_BCST " + mp.getName() + " " + privateMessage;
+            mp.getServer().messageClient(receiver, message);
+        }else {
+            mp.sendMessage("FAIL07 usernames are incorrect.");
+        }
     }
 
 }
