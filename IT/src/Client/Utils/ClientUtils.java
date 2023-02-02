@@ -1,13 +1,32 @@
-package GlobalUtilities;
+package Client.Utils;
 
 import java.io.File;
 import java.io.FileInputStream;
-import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.InputMismatchException;
+import java.util.Scanner;
 
-public class Utils {
+public class ClientUtils {
+    public static int getUserInput() {
+        Scanner scanner = new Scanner(System.in);
+        try {
+            return scanner.nextInt();
+        } catch (InputMismatchException e) {
+            System.err.println("Entered value is not an integer");
+            return -1;
+        }
+    }
+    public static String getUserInputString() {
+        Scanner scanner = new Scanner(System.in);
+        try {
+            return scanner.nextLine();
+        } catch (InputMismatchException e) {
+            System.err.println("Entered value is not an String");
+            return "";
+        }
+    }
     // This function takes the split message of the user from response and returns a complete String
     public static String combinedMessage(int messageStart, String[] response) {
         String message = "";
@@ -43,4 +62,5 @@ public class Utils {
 
         return sb.toString();
     }
+
 }

@@ -1,4 +1,4 @@
-package Server.ServerResponse.Survey;
+package Server.Survey;
 
 public class Answer {
     private String answer;

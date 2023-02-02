@@ -1,7 +1,6 @@
 package Client;
 
-import GlobalUtilities.Utils;
-import Server.FileTransferThread;
+import Client.Utils.ClientUtils;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -37,9 +36,7 @@ public class ServerListener implements Runnable {
             String[] response = serverResponse.split(" ");;
             switch (response[0]){
                 case "PING" ->{
-                    if (client.getPongAllowed()) {
-                        clientInputListener.setCommand("PONG");
-                    }
+                    clientInputListener.setCommand("PONG");
                 }case "QUIT_OK" ->{
                     try {
                         client.getClientSocket().close();
@@ -50,35 +47,37 @@ public class ServerListener implements Runnable {
                     System.out.println(serverResponse);
                 }case "IDENT_OK" ->{
                     client.setHasLoggedIn(true);
+                    client.setUsername(response[1]);
                 }case "JOINED" ->{
                     System.out.println(response[1]+" joined the chat!");
                 }case "DISCONNECTED" ->{
                     System.out.println(response[1]+" left the chat :(");
                 }case "BCST_OK" ->{
-                    System.out.println("ME: "+ Utils.combinedMessage(1, response));
+                    System.out.println("ME: "+ ClientUtils.combinedMessage(1, response));
                 }case "BCST" ->{
-                    System.out.println(response[1]+": "+ Utils.combinedMessage(2,response));
+                    System.out.println(response[1]+": "+ ClientUtils.combinedMessage(2,response));
                 }case "LIST_RESPONSE" ->{
                     for (int i=1;i<response.length;i++){
                         System.out.println(response[i]);
                     }
                 }case "PRV_BCST_OK" ->{
-                    //todo private message sent do what?
+                    System.out.println("PRIVATE< me: "+response[1]+" >");
                 }case "PRV_BCST" ->{
-                    System.out.println("PRIVATE< "+response[1]+": "+ Utils.combinedMessage(2, response)+" >");
+                    System.out.println("PRIVATE< "+response[1]+": "+ ClientUtils.combinedMessage(2, response)+" >");
                 }case "SURVEY_OK" ->{
                     client.setSurvey(true);
                 }case "SURVEY_Q_OK" ->{
-                    client.sendQuestion();
+                    //todo do what here?
                 }case "SURVEY_LIST" ->{
-                    for (int i=1;i<response.length;i++){
-                        System.out.println("Currently available people to join your survey");
-                        System.out.println(i+". "+response[i]);
-                    }
+                    client.setServerResponse(serverResponse);
+                }case "SURVEY_LIST_OK" ->{
+                    client.setClientList(false);
+                }case "SURVEY_EVENT" -> {
+                    client.addEventCreator(response[1]);
                 }case "TRANSFER_OK" ->{
                     System.out.println("The transfer request has been sent!");
                 }case "TRANSFER_REQ" -> {
-                    System.out.println( "The user " + response[1] + " wants to transfer a file to you named " + response[2] + " with the size " + Utils.combinedMessage(3, response) + ". Enter 9 to accept and 0 to decline!");
+                    System.out.println( "The user " + response[1] + " wants to transfer a file to you named " + response[2] + " with the size " + ClientUtils.combinedMessage(3, response) + ". Enter 9 to accept and 0 to decline!");
                     client.setTransferRequest(true);
                     client.setLastTransferRequestUser(response[1]);
                     client.setLastTransferRequestFileName(response[2]);
@@ -98,16 +97,18 @@ public class ServerListener implements Runnable {
                 }case "FAIL03" ->{
                     System.out.println("Please log in first");
                 }case "FAIL04" -> {
-                    System.out.println("User cannot login twice");
+                    System.out.println("Pong without ping");
                 }case "FAIL05" -> {
-                    System.out.println("Pong sent without receiving a ping");
-                }case "FAIL06", "FAIL10" ->{
-                    System.out.println(Utils.combinedMessage(1, response));
+                    System.out.println("Not enough users for survey");
+                }case "FAIL06"->{
+                    System.out.println(ClientUtils.combinedMessage(1, response));
+                }case "FAIL07"-> {
+                    System.out.println("usernames are incorrect");
                 }case "FAIL00" ->{
                     System.out.println("invalid command");
                 }
             }
-            client.setWaitingResponse(false);
+            client.setWaitingResponse(true);
         }
     }
     private InputStream inputServer() {

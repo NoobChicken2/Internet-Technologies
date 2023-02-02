@@ -1,12 +1,7 @@
 package Server.ServerResponse;
-
-import GlobalUtilities.Utils;
+;
 import Server.MessageProcessor;
-import Server.Server;
-
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
+import Server.Utils.ServerUtils;
 
 public class ServerResponsePrivateMessage implements ServerResponse{
     private MessageProcessor mp;
@@ -20,7 +15,7 @@ public class ServerResponsePrivateMessage implements ServerResponse{
             mp.sendMessage("FAIL00 Unkown command");
         }else {
             if (mp.checkClientLoggedIn()) {
-                sendPrivateMessage(response[1], Utils.combinedMessage(2, response));
+                sendPrivateMessage(response[1], ServerUtils.combinedMessage(2, response));
             }
         }
     }
