@@ -30,14 +30,14 @@ public class ServerResponseSurveyEvent implements ServerResponse{
 
         //Sending first question to participants
         if (request.startsWith("SURVEY_EVENT JOIN")){
-            sc.getSurvey().setRespondents();
             String[] response = request.split(" ");
             String nameCreator=response[2];
-            sc=sc.getServer().getMessageProcessor(nameCreator);
+            sc=mp.getServer().getMessageProcessor(nameCreator);
+            sc.getSurvey().setRespondents();
 
             Question q= sc.getSurvey().getQuestion(0);
             ArrayList<Answer> answers=q.getAnswers();
-            String message="SURVEY_EVENT Q "+q.getQuestion()+";0";
+            String message="SURVEY_EVENT Q ;"+q.getQuestion()+";0;";
             for (int i = 0; i < q.getNumOfAnswers(); i++) {
                 message=message+";"+answers.get(i).getAnswer();
             }
