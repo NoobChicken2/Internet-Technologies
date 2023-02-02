@@ -57,53 +57,69 @@ public class PrivateMessageTest {
     }
 
     @Test
-    void privateMessageAccepted() throws InterruptedException {
+    void TC7_1_privateMessageSendAndReceived() throws InterruptedException {
         receiveLineWithTimeout(in); //init message
         out.println("IDENT test");
         out.flush();
-        receiveLineWithTimeout(in);
+        receiveLineWithTimeout(in);//ok
+
         receiveLineWithTimeout(in2); //init message
         out2.println("IDENT test2");
         out2.flush();
-        String secondClientSignedIn = receiveLineWithTimeout(in2);
-        if(secondClientSignedIn.equals("IDENT_OK test2")){
-            String message = "testing";
-            out.println("PRV_BCST test2 " + message);
-            out.flush();
-            String serverResponse = receiveLineWithTimeout(in2);
-            String [] responseText = serverResponse.split(" ");
-            assertEquals("PRV_BCST", responseText[0]);
-            assertEquals(firstUser, responseText[1]);
-            assertEquals(message,responseText[2]);
-        }
+        receiveLineWithTimeout(in2);//ok
+        receiveLineWithTimeout(in);//test2 joined
+
+        String message = "testing";
+        out.println("PRV_BCST test2 " + message);
+        out.flush();
+
+        String serverResponse = receiveLineWithTimeout(in);
+        String serverResponse2 = receiveLineWithTimeout(in2);
+
+        assertEquals("PRV_BCST test testing", serverResponse2);
+        assertEquals("PRV_BCST_OK testing", serverResponse);
+
     }
 
     @Test
-    void privateMessageReceived() {
+    void TC7_2_privateMessageSendToIncorrectUsername() {
         receiveLineWithTimeout(in); //init message
         out.println("IDENT test");
         out.flush();
-        receiveLineWithTimeout(in);
+        receiveLineWithTimeout(in);//ok
+
+        receiveLineWithTimeout(in2); //init message
+        out2.println("IDENT test2");
+        out2.flush();
+        receiveLineWithTimeout(in2);//ok
+        receiveLineWithTimeout(in);//test2 joined
+
         String message = "testing";
-        out.println("PRV_BCST test " + message);
+        out.println("PRV_BCST test3 " + message);
         out.flush();
+
         String serverResponse = receiveLineWithTimeout(in);
-        String []responseText = serverResponse.split(" ");
-        assertEquals("PRV_BCST_OK", responseText[0]);
-        assertEquals(message,responseText[1]);
+
+        assertEquals("FAIL07 usernames are incorrect. ", serverResponse);
     }
 
 
 
     @Test
-    void privateMessageError() {
-        receiveLineWithTimeout(in); //init message;
-        String message = "testing";
-        out.println("PRV_BCST test " + message);
+    void TC7_3_privateMessageSendWithoutLoggingIn() {
+        receiveLineWithTimeout(in); //init message
+        out.println("IDENT test");
         out.flush();
-        String serverResponse = receiveLineWithTimeout(in);
-        String []responseText = serverResponse.split(" ");
-        assertEquals("FAIL03", responseText[0]);
+        receiveLineWithTimeout(in);//ok
+
+        receiveLineWithTimeout(in2); //init message
+        out2.println("PRV_BCST test1 testing");
+        out2.flush();
+        String serverResponse = receiveLineWithTimeout(in2);//error
+
+
+
+        assertEquals("FAIL03 Please log in first", serverResponse);
     }
 
 
