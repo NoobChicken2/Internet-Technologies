@@ -30,14 +30,14 @@ public class FileTransferSession implements Runnable{
         } else if (identifier.indexOf('D') != -1) {
             download();
         }
-        fileTransferThreadInstance.removeFileTransferRequest(identifier);
+//        fileTransferThreadInstance.removeFileTransferRequest(identifier);
 
         // Close socket connection after the upload or download
-//        try {
-//            socket.close();
-//        } catch (IOException e) {
-//            throw new RuntimeException(e);
-//        }
+        try {
+            socket.close();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
     }
     private void identifyFirstBytes() {
         try {
@@ -62,7 +62,9 @@ public class FileTransferSession implements Runnable{
         try {
             uploaderIS.transferTo(outputStream);
         } catch (IOException e) {
-            e.printStackTrace();
+            for(String key:fileTransferThreadInstance.getMap().keySet()) {
+                System.out.println(key);
+            }
         }
     }
     public String getIdentifier() {

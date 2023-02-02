@@ -5,6 +5,7 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.ServerSocket;
 import java.net.Socket;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
@@ -12,7 +13,7 @@ import java.util.Map;
 public class FileTransferThread implements Runnable{
     private final int SERVER_PORT_FT = 8081;
     private ServerSocket fileTransferSocket = openFileTransferSocket();
-    private Map<String, FileTransferSession> fileTransferRequests = new HashMap();
+    private Map<String, FileTransferSession> fileTransferRequests = Collections.synchronizedMap(new HashMap<>());
 
     @Override
     public void run() {
@@ -70,19 +71,28 @@ public class FileTransferThread implements Runnable{
     public InputStream getUploaderInputStream(String identifier) {
         String uploaderIdentifier = "U" + identifier.substring(1);
         InputStream is = null;
+
         for(String key: fileTransferRequests.keySet()){
             if(key.equals(uploaderIdentifier)) {
                 is = fileTransferRequests.get(key).getInputStream();
-                System.out.println("Uploader found");
             }
         }
-        System.out.println("Out of for loop");
         if (is == null) {
             for(String key:fileTransferRequests.keySet()) {
                 System.out.println(key);
             }
         }
+        System.out.println();
         return is;
+    }
+    private synchronized FileTransferSession findSession(String identifier) {
+        FileTransferSession session = null;
+        for(String key: fileTransferRequests.keySet()){
+            if(key.equals(identifier)) {
+                session = fileTransferRequests.get(key);
+            }
+        }
+        return session;
     }
     private ServerSocket openFileTransferSocket() {
         ServerSocket socket;
