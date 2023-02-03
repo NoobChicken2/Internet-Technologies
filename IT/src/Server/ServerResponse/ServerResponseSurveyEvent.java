@@ -34,14 +34,17 @@ public class ServerResponseSurveyEvent implements ServerResponse{
             String nameCreator=response[2];
             sc=mp.getServer().getMessageProcessor(nameCreator);
             sc.getSurvey().setRespondents();
-
-            Question q= sc.getSurvey().getQuestion(0);
-            ArrayList<Answer> answers=q.getAnswers();
-            String message="SURVEY_EVENT Q ;"+q.getQuestion()+";0";
-            for (int i = 0; i < q.getNumOfAnswers(); i++) {
-                message=message+";"+answers.get(i).getAnswer();
+            if (!sc.getSurvey().isFinished()) {
+                Question q = sc.getSurvey().getQuestion(0);
+                ArrayList<Answer> answers = q.getAnswers();
+                String message = "SURVEY_EVENT Q ;" + q.getQuestion() + ";0";
+                for (int i = 0; i < q.getNumOfAnswers(); i++) {
+                    message = message + ";" + answers.get(i).getAnswer();
+                }
+                sc.sendMessage(message);
+            }else {
+                mp.sendMessage("FAIL08 Survey has expired.");
             }
-            sc.sendMessage(message);
         }
 
         //Receiving answers and sending next question
@@ -70,6 +73,7 @@ public class ServerResponseSurveyEvent implements ServerResponse{
                 if (sc.getSurvey().checkLastRespondent()){
                     String respond=sc.getSurvey().getSummary();
                     mp.getServer().broadcastMessageToListOfClients(respond,sc.getSurvey().getParticipants());
+                    mp.getSurvey().setFinished();
                 }
             }
         }

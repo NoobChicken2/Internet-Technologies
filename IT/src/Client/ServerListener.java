@@ -67,11 +67,12 @@ public class ServerListener implements Runnable {
                 }case "SURVEY_OK" ->{
                     client.setSurvey(true);
                 }case "SURVEY_Q_OK" ->{
-                    //todo do what here?
+                    System.out.println(serverResponse);
                 }case "SURVEY_LIST" ->{
                     client.setServerResponse(serverResponse);
                 }case "SURVEY_LIST_OK" ->{
                     client.setClientList(false);
+                    client.setSurvey(false);
                 }case "SURVEY_EVENT" -> {
                     client.addEventCreator(response[1]);
                 }case "TRANSFER_OK" ->{

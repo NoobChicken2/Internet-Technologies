@@ -57,6 +57,9 @@ public class Survey {
     public boolean isFinished() {
         return isFinished;
     }
+    public void setFinished() {
+        isFinished=true;
+    }
 
     public String getSummary(){
         isFinished=true;
