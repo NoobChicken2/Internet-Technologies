@@ -27,8 +27,7 @@ public class ServerResponseQuit implements ServerResponse{
 
     private void quit(String message) throws IOException {
         mp.sendMessage(message);
-        mp.getServer().broadcastMessageToEveryone("DISCONNECTED " + mp.getName(), mp.getName());
         mp.getServer().removeClient(mp.getName());
-        mp.socket.close();
+        mp.getSocket().close();
     }
 }

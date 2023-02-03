@@ -11,14 +11,14 @@ import java.net.Socket;
 public class MessageProcessor implements Runnable{
 //  ==================web sockets=================
     private final Server server;
-    public Socket socket;
+    private Socket socket;
     private InputStream inputStream;
     private OutputStream outputStream;
     private  PrintWriter sendMessage;
     private BufferedReader readMessage;
 //  ===============================================
     private String name;
-    private boolean exit=false;
+    private boolean exit;
     private Survey survey;
     private Thread clientHeartbeat;
 
@@ -29,6 +29,7 @@ public class MessageProcessor implements Runnable{
         this.sendMessage = new PrintWriter(outputStream);
         this.readMessage = new BufferedReader(new InputStreamReader(inputStream));
         this.server=server;
+        this.exit=false;
     }
 
     @Override
@@ -124,5 +125,8 @@ public class MessageProcessor implements Runnable{
     }
     public Server getServer() {
         return server;
+    }
+    public Socket getSocket() {
+        return socket;
     }
 }

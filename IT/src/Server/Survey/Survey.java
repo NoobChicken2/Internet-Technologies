@@ -23,6 +23,9 @@ public class Survey {
         return participants;
     }
 
+    public int setFinishedSurvey() {
+        return this.finishedSurvey++;
+    }
     public int getFinishedSurvey() {
         return this.finishedSurvey;
     }

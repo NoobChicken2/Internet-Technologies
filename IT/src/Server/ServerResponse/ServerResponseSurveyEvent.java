@@ -37,7 +37,7 @@ public class ServerResponseSurveyEvent implements ServerResponse{
 
             Question q= sc.getSurvey().getQuestion(0);
             ArrayList<Answer> answers=q.getAnswers();
-            String message="SURVEY_EVENT Q ;"+q.getQuestion()+";0;";
+            String message="SURVEY_EVENT Q ;"+q.getQuestion()+";0";
             for (int i = 0; i < q.getNumOfAnswers(); i++) {
                 message=message+";"+answers.get(i).getAnswer();
             }
@@ -66,7 +66,7 @@ public class ServerResponseSurveyEvent implements ServerResponse{
                 }
                 sc.sendMessage(mes);
             }else {
-                sc.getSurvey().getFinishedSurvey();
+                sc.getSurvey().setFinishedSurvey();
                 if (sc.getSurvey().checkLastRespondent()){
                     String respond=sc.getSurvey().getSummary();
                     mp.getServer().broadcastMessageToListOfClients(respond,sc.getSurvey().getParticipants());
