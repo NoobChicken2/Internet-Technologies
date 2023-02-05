@@ -7,5 +7,5 @@ import java.security.NoSuchAlgorithmException;
 
 public interface ClientRequest {
 
-    public abstract void request(int menuValue) throws InterruptedException, NoSuchAlgorithmException, IOException;
+    public abstract void request(int menuValue) throws Exception;
 }

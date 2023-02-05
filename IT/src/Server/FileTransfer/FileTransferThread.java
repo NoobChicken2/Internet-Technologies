@@ -1,4 +1,4 @@
-package Server;
+package Server.FileTransfer;
 
 import java.io.IOException;
 import java.io.InputStream;

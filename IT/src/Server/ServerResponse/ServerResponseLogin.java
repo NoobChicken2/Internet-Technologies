@@ -46,7 +46,7 @@ public class ServerResponseLogin  implements ServerResponse{
             return false;
         }
         for (int i = 0; i < clientName.length(); i++) {
-            if ((Character.isLetterOrDigit(clientName.charAt(i)) == false)) {
+            if ((!Character.isLetterOrDigit(clientName.charAt(i)))) {
                 mp.sendMessage("FAIL02 Username has an invalid format or length");
                 return false;
             }

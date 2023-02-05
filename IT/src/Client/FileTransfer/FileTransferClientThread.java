@@ -1,4 +1,4 @@
-package Client;
+package Client.FileTransfer;
 
 import Client.Utils.ClientUtils;
 

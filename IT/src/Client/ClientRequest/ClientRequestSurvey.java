@@ -8,20 +8,21 @@ public class ClientRequestSurvey implements ClientRequest{
 
     public ClientRequestSurvey(Client client) {
         this.client=client;
-        this.client.setSurvey(false);
-        this.client.setClientList(false);
     }
 
     @Override
     public void request(int menuValue) throws InterruptedException {
         client.getClientInputListener().setCommand("SURVEY START");
         Thread.sleep(3000);
-        while (client.isSurvey()) {
+        if (client.getServerResponse().equals("SURVEY_OK")) {
+            client.setServerResponse("");
             sendQuestions();
+            Thread.sleep(3000);
             String[] response = client.getServerResponse().split(" ");
-            if (response[0].equals("SURVEY_LIST")){
+            if (response[0].equals("SURVEY_LIST")) {
                 sendClientList(response);
             }
+            client.setServerResponse("");
         }
     }
 
@@ -30,12 +31,12 @@ public class ClientRequestSurvey implements ClientRequest{
         String message="";
         while (client.isClientList()) {
             message=message+"SURVEY LIST_RESPONSE ";
-            for (int i = 1; i < response.length-1; i++) {
-                System.out.println("Currently logged in clients");
-                System.out.println(response[i]);
+            System.out.println("Currently logged in clients");
+            for (int i = 1; i < response.length; i++) {
+                System.out.println(response[i] + " ");
             }
             System.out.println("Please enter clients names with one space in between");
-            message = ClientUtils.getUserInputString();
+            message = message+ClientUtils.getUserInputString();
             client.getClientInputListener().setCommand(message);
             Thread.sleep(3000);
         }
@@ -46,20 +47,20 @@ public class ClientRequestSurvey implements ClientRequest{
         while (questions) {
 
             //getting the question
-            String message = "SURVEY Q ";
+            String message = "SURVEY Q /";
             System.out.println("Please enter your question:");
-            message = message + ClientUtils.getUserInputString() + " ";
+            message = message + ClientUtils.getUserInputString() + " /";
 
             //getting the answers
             System.out.println("How many answers are in this question? (min:2/max:4)");
-            int numOfAns =ClientUtils.getUserInput();
+            int numOfAns = ClientUtils.getUserInput();
             while (numOfAns < 2 || numOfAns > 4) {
                 System.out.println("invalid number of answers enter number of answers again");
                 numOfAns = ClientUtils.getUserInput();
             }
             for (int i = 0; i < numOfAns; i++) {
                 System.out.println("enter your answer");
-                message = message + ClientUtils.getUserInputString() + " ";
+                message = message + ClientUtils.getUserInputString() + " /";
             }
             client.getClientInputListener().setCommand(message);
 
@@ -67,12 +68,12 @@ public class ClientRequestSurvey implements ClientRequest{
             System.out.println("Do you want to add a new Question?  1. Yes  |  2. No");
             int input = ClientUtils.getUserInput();
             if (input == 2) {
-                questions=false;
                 client.getClientInputListener().setCommand("SURVEY Q_STOP");
+                break;
             }
             numOfQuestions++;
             if (numOfQuestions>10){
-                questions=false;
+                break;
             }
         }
     }

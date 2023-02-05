@@ -1,9 +1,9 @@
 package Server;
 
+import Server.Heartbeat.Heartbeat;
 import Server.ServerResponse.*;
 import Server.ServerResponse.ServerResponseSurvey;
 import Server.Survey.Survey;
-import Server.Utils.ServerUtils;
 
 import java.io.*;
 import java.net.Socket;
@@ -18,7 +18,7 @@ public class MessageProcessor implements Runnable{
     private BufferedReader readMessage;
 //  ===============================================
     private String name;
-    private boolean exit=false;
+    private boolean exit;
     private Survey survey;
     private Thread clientHeartbeat;
 
@@ -29,6 +29,7 @@ public class MessageProcessor implements Runnable{
         this.sendMessage = new PrintWriter(outputStream);
         this.readMessage = new BufferedReader(new InputStreamReader(inputStream));
         this.server=server;
+        this.exit=false;
     }
 
     @Override
@@ -43,7 +44,7 @@ public class MessageProcessor implements Runnable{
             try {
                 // getting response from client
                 String receivedString=readMessage.readLine();
-
+                System.out.println(receivedString);
                 if (receivedString==null){
                     new ServerResponseQuit(this).respond("QUIT_OK");
                 }else{
@@ -69,6 +70,9 @@ public class MessageProcessor implements Runnable{
                         }
                         case "SURVEY_EVENT" ->{
                             new ServerResponseSurveyEvent(this).respond(receivedString);
+                        }
+                        case "ENCRYPT" ->{
+                            new ServerResponseEncryptMessage(this).respond(receivedString);
                         }
                         case "PONG" -> {
                             if (heartbeat.getIsPingSet()) {

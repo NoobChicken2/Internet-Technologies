@@ -55,6 +55,10 @@ public class Survey {
         return isFinished;
     }
 
+    public void setFinished(boolean finished) {
+        isFinished = finished;
+    }
+
     public String getSummary(){
         isFinished=true;
         String response="SURVEY_SUMMARY "+finishedSurvey+"|";

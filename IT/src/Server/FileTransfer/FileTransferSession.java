@@ -1,4 +1,4 @@
-package Server;
+package Server.FileTransfer;
 
 import java.io.IOException;
 import java.io.InputStream;
@@ -27,10 +27,8 @@ public class FileTransferSession implements Runnable{
         identifyFirstBytes();
 
         // Runs depending on identifier
-        System.out.println("Current: " + sessionNumber + " " + fileTransferThreadInstance.getMatchingIdentifierSession(identifier).getSessionNumber());
         if (fileTransferThreadInstance.checkForMatchingIdentifier(identifier)) {
             if(sessionNumber > fileTransferThreadInstance.getMatchingIdentifierSession(identifier).getSessionNumber()) {
-                System.out.println("ran");
                 transferBytes();
             }
         }
