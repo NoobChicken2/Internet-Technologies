@@ -45,7 +45,7 @@ public class Client {
         this.rsa=new RSA();
     }
 
-    public void run () throws Exception {
+    private void run () throws Exception {
         Thread listenUser = new Thread(clientInputListener);
         Thread listenServer = new Thread(serverListener);
         listenServer.start();
@@ -110,11 +110,11 @@ public class Client {
                         -------------------------------------------
                        """);
     }
-    public void login(){
+    private void login(){
         System.out.println("Please login as a client: ");
         clientInputListener.setCommand("IDENT " + ClientUtils.getUserInputString());
     }
-    public void printHelp(){
+    private void printHelp(){
         System.out.println("===========================================================================================================================");
         System.out.println("BCST <message> | Sends broadcast messages to everyone on the server ");
         System.out.println("IDENT <username> | Logs you in the server");
