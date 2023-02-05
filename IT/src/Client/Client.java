@@ -19,7 +19,6 @@ public class Client {
     private String username;
     private boolean hasLoggedIn;
     private String serverResponse;
-    private boolean waitingResponse;
     //=================Encryption======================
     private HashMap<String, String>keys;
     private HashMap<String, String>PublicKeys;
@@ -43,7 +42,6 @@ public class Client {
         this.username="";
         this.hasLoggedIn=false;
         this.serverResponse="";
-        this.waitingResponse=false;
         this.rsa=new RSA();
     }
 
@@ -53,9 +51,10 @@ public class Client {
         listenServer.start();
         listenUser.start();
         while (!hasLoggedIn) {
-            if (!waitingResponse) {
-                login();
-            }
+            login();
+            // Delayed response from server causes login to be repeated a second time
+            // Optimize this later to wait for response using asynchronous methods
+            Thread.sleep(1000);
         }
         while (hasLoggedIn) {
             menu();
@@ -152,9 +151,6 @@ public class Client {
     }
     public String getServerResponse() {
         return serverResponse;
-    }
-    public void setWaitingResponse(boolean waitingResponse) {
-        this.waitingResponse = waitingResponse;
     }
     public void setUsername(String username) {
         this.username = username;

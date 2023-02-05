@@ -5,6 +5,7 @@ import Server.Survey.Answer;
 import Server.Survey.Question;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -74,11 +75,12 @@ public class ServerResponseSurvey implements ServerResponse {
         }
     }
     private boolean checkQuestion(String[] request){
+        System.out.println(Arrays.toString(request));
         if (mp.getSurvey().getQuestions().size()>10){
             mp.sendMessage("SURVEY_LIST "+ mp.getServer().getClientList(mp.getName()));
             return false;
         }
-        if (request.length<4 || request.length>6){
+        if (request.length <= 3 || request.length >= 6){
             mp.sendMessage("FAIL06 Invalid question or wrong number of answers");
             return false;
         }

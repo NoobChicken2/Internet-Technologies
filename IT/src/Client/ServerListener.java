@@ -72,6 +72,7 @@ public class ServerListener implements Runnable {
                 }case "SURVEY_Q_OK" ->{
                     //todo do what here?
                 }case "SURVEY_LIST" ->{
+                    System.out.println(serverResponse);
                     client.setServerResponse(serverResponse);
                 }case "SURVEY_LIST_OK" ->{
                     client.setClientList(false);
@@ -130,7 +131,6 @@ public class ServerListener implements Runnable {
                     System.out.println("invalid command");
                 }
             }
-            client.setWaitingResponse(true);
         }
     }
     private InputStream inputServer() {
