@@ -1,5 +1,6 @@
-package Server;
+package Server.Heartbeat;
 
+import Server.MessageProcessor;
 import Server.ServerResponse.ServerResponseQuit;
 
 import java.util.Timer;

@@ -5,6 +5,7 @@ import Server.Survey.Answer;
 import Server.Survey.Question;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Timer;
 import java.util.TimerTask;
 
@@ -27,7 +28,6 @@ public class ServerResponseSurvey implements ServerResponse {
         }
     }
     private void surveyProcessor(String request){
-        System.out.println(request);
 
         //Starting the survey
         if (request.startsWith("SURVEY START")){
@@ -63,24 +63,24 @@ public class ServerResponseSurvey implements ServerResponse {
                 TimerTask SendSummary = new TimerTask() {
                     @Override
                     public void run() {
-                        if (!mp.getSurvey().isFinished()){
+                        if (mp.getSurvey()!=null && mp.getSurvey().isFinished()!=true){
                             String respond=mp.getSurvey().getSummary();
                             mp.getServer().broadcastMessageToListOfClients(respond,mp.getSurvey().getParticipants());
                         }
                     }
                 };
-
                 surveyTimer.schedule(SendSummary, 300000);
             }
 
         }
     }
     private boolean checkQuestion(String[] request){
+        System.out.println(Arrays.toString(request));
         if (mp.getSurvey().getQuestions().size()>10){
             mp.sendMessage("SURVEY_LIST "+ mp.getServer().getClientList(mp.getName()));
             return false;
         }
-        if (request.length<4 || request.length>6){
+        if (request.length <= 3 || request.length >= 6){
             mp.sendMessage("FAIL06 Invalid question or wrong number of answers");
             return false;
         }

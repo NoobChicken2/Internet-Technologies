@@ -1,8 +1,6 @@
 package Server.ServerResponse;
 
 import Server.MessageProcessor;
-import Server.Server;
-import Server.FileTransferThread;
 
 import java.util.UUID;
 
