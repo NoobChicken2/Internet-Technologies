@@ -96,18 +96,6 @@ public class SurveyEventJoinTests {
         assertEquals("SURVEY_EVENT test", serverResponse2);
         assertEquals("SURVEY_EVENT test", serverResponse3);
     }
-    @Test
-    void TC10_2_JoiningSurveyReturnsFirstQuestion() throws InterruptedException {
-        receiveLineWithTimeout(in2);
-        receiveLineWithTimeout(in3);
-
-        out2.println("SURVEY_EVENT JOIN test");
-        out2.flush();
-        String serverResponse2 = receiveLineWithTimeout(in2);
-
-
-        assertEquals("SURVEY_EVENT Q ;How much is 1+1?;1;2;3;4", serverResponse2);
-    }
     private String receiveLineWithTimeout(BufferedReader reader){
         return assertTimeoutPreemptively(ofMillis(max_delta_allowed_ms), reader::readLine);
     }

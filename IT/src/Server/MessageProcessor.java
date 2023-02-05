@@ -44,7 +44,7 @@ public class MessageProcessor implements Runnable{
             try {
                 // getting response from client
                 String receivedString=readMessage.readLine();
-                System.out.println(receivedString);
+                //System.out.println(receivedString);
                 if (receivedString==null){
                     new ServerResponseQuit(this).respond("QUIT_OK");
                 }else{
