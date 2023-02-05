@@ -80,7 +80,7 @@ public class ServerResponseSurvey implements ServerResponse {
             mp.sendMessage("SURVEY_LIST "+ mp.getServer().getClientList(mp.getName()));
             return false;
         }
-        if (request.length <= 3 || request.length >= 6){
+        if (request.length < 3 || request.length > 6){
             mp.sendMessage("FAIL06 Invalid question or wrong number of answers");
             return false;
         }
