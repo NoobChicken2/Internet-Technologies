@@ -64,6 +64,15 @@ public class Server {
         }
         return result;
     }
+    public String getClient(String username){
+        String result="";
+        for (MessageProcessor user : clients.values()) {
+            if (user.getName().equals(username)) {
+                result = user.getName();
+            }
+        }
+        return result;
+    }
     public void messageClient(String client, String message){
         clients.get(client).sendMessage(message);
     }

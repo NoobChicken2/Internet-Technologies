@@ -7,24 +7,25 @@ import java.net.ServerSocket;
 import java.net.Socket;
 import java.util.Collections;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.Map;
 
 public class FileTransferThread implements Runnable{
     private final int SERVER_PORT_FT = 8081;
     private ServerSocket fileTransferSocket = openFileTransferSocket();
     private Map<String, FileTransferSession> fileTransferRequests = Collections.synchronizedMap(new HashMap<>());
+    private int sessionCount = 0;
 
     @Override
     public void run() {
         System.out.println("File transfer Socket Thread started");
         while (true) {
             Socket socket = getSocket();
+            sessionCount++;
 
             InputStream inputStream = getInputStream(socket);
             OutputStream outputStream = getOutputStream(socket);
 
-            FileTransferSession newSession = new FileTransferSession(this, inputStream, outputStream, socket);
+            FileTransferSession newSession = new FileTransferSession(this, inputStream, outputStream, socket, sessionCount);
             new Thread(newSession).start();
         }
     }
@@ -58,34 +59,31 @@ public class FileTransferThread implements Runnable{
     public void addTransferRequest(String identifier, FileTransferSession session) {
         fileTransferRequests.put(identifier, session);
     }
-    public OutputStream getDownloaderOutputStream(String identifier) {
-        String downloaderIdentifier = "D" + identifier.substring(1);
-        OutputStream os = null;
-        for(String key: fileTransferRequests.keySet()){
-            if(key.equals(downloaderIdentifier)) {
-                os = fileTransferRequests.get(key).getOutputStream();
-            }
-        }
-        return os;
+    public void removeFileTransferRequest(String identifier) {
+        fileTransferRequests.remove(identifier);
     }
-    public InputStream getUploaderInputStream(String identifier) {
-        String uploaderIdentifier = "U" + identifier.substring(1);
-        InputStream is = null;
-
-        for(String key: fileTransferRequests.keySet()){
-            if(key.equals(uploaderIdentifier)) {
-                is = fileTransferRequests.get(key).getInputStream();
-            }
+    private String getMatchingIdentifier(String identifier) {
+        String otherIdentifier;
+        if (identifier.indexOf('U') != -1) {
+            otherIdentifier = "D" + identifier.substring(1);
+        } else {
+            otherIdentifier = "U" + identifier.substring(1);
         }
-        if (is == null) {
-            for(String key:fileTransferRequests.keySet()) {
-                System.out.println(key);
-            }
-        }
-        System.out.println();
-        return is;
+        return otherIdentifier;
     }
-    private synchronized FileTransferSession findSession(String identifier) {
+    public boolean checkForMatchingIdentifier(String identifier) {
+        String otherIdentifier = getMatchingIdentifier(identifier);
+        for(String key: fileTransferRequests.keySet()){
+            if(key.equals(otherIdentifier)) {
+                return true;
+            }
+        }
+        return false;
+    }
+    public FileTransferSession getMatchingIdentifierSession(String identifier) {
+        return findSession(getMatchingIdentifier(identifier));
+    }
+    private FileTransferSession findSession(String identifier) {
         FileTransferSession session = null;
         for(String key: fileTransferRequests.keySet()){
             if(key.equals(identifier)) {
@@ -102,11 +100,5 @@ public class FileTransferThread implements Runnable{
             throw new RuntimeException(e);
         }
         return socket;
-    }
-    public void removeFileTransferRequest(String identifier) {
-        fileTransferRequests.remove(identifier);
-    }
-    public Map<String, FileTransferSession> getMap() {
-        return fileTransferRequests;
     }
 }

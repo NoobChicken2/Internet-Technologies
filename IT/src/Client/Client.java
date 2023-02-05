@@ -29,6 +29,7 @@ public class Client {
     private boolean transferRequest;
     private String lastTransferRequestUser;
     private String lastTransferRequestFileName;
+    private String lastTransferRequestChecksum;
 
     public Client() throws IOException {
         this.socket = new Socket("127.0.0.1", 3000);
@@ -129,6 +130,11 @@ public class Client {
     public String getLastTransferRequestFileName() {
         return lastTransferRequestFileName;
     }
+    public String getLastTransferRequestChecksum() {
+        String checksum = lastTransferRequestChecksum;
+        lastTransferRequestChecksum = "";
+        return checksum;
+    }
     public boolean getTransferRequest() {
         return transferRequest;
     }
@@ -161,6 +167,9 @@ public class Client {
     }
     public void setLastTransferRequestUser(String lastTransferRequestUser) {
         this.lastTransferRequestUser = lastTransferRequestUser;
+    }
+    public void setLastTransferRequestChecksum(String checksum) {
+        this.lastTransferRequestChecksum = checksum;
     }
     public void setServerResponse(String serverResponse) {
         this.serverResponse = serverResponse;

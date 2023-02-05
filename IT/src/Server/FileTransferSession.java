@@ -11,12 +11,14 @@ public class FileTransferSession implements Runnable{
     private InputStream inputStream;
     private OutputStream outputStream;
     private String identifier;
+    private int sessionNumber;
 
-    public FileTransferSession(FileTransferThread instance, InputStream inputStream, OutputStream outputStream, Socket socket) {
+    public FileTransferSession(FileTransferThread instance, InputStream inputStream, OutputStream outputStream, Socket socket, int sessionNumber) {
         this.inputStream = inputStream;
         this.outputStream = outputStream;
         this.fileTransferThreadInstance = instance;
         this.socket = socket;
+        this.sessionNumber = sessionNumber;
     }
 
     @Override
@@ -24,19 +26,13 @@ public class FileTransferSession implements Runnable{
         // Identify
         identifyFirstBytes();
 
-        // Run depending on identifier
-        if (identifier.indexOf('U') != -1) {
-            upload();
-        } else if (identifier.indexOf('D') != -1) {
-            download();
-        }
-//        fileTransferThreadInstance.removeFileTransferRequest(identifier);
-
-        // Close socket connection after the upload or download
-        try {
-            socket.close();
-        } catch (IOException e) {
-            throw new RuntimeException(e);
+        // Runs depending on identifier
+        System.out.println("Current: " + sessionNumber + " " + fileTransferThreadInstance.getMatchingIdentifierSession(identifier).getSessionNumber());
+        if (fileTransferThreadInstance.checkForMatchingIdentifier(identifier)) {
+            if(sessionNumber > fileTransferThreadInstance.getMatchingIdentifierSession(identifier).getSessionNumber()) {
+                System.out.println("ran");
+                transferBytes();
+            }
         }
     }
     private void identifyFirstBytes() {
@@ -49,23 +45,30 @@ public class FileTransferSession implements Runnable{
             throw new RuntimeException(e);
         }
     }
-    private void upload() {
-        OutputStream downloaderOS = fileTransferThreadInstance.getDownloaderOutputStream(identifier);
-        try {
-            inputStream.transferTo(downloaderOS);
-        } catch (IOException e) {
-            e.printStackTrace();
-        }
-    }
-    private void download() {
-        InputStream uploaderIS = fileTransferThreadInstance.getUploaderInputStream(identifier);
-        try {
-            uploaderIS.transferTo(outputStream);
-        } catch (IOException e) {
-            for(String key:fileTransferThreadInstance.getMap().keySet()) {
-                System.out.println(key);
+    private void transferBytes() {
+        FileTransferSession matchingSession = fileTransferThreadInstance.getMatchingIdentifierSession(identifier);
+
+        if (identifier.indexOf('U') != -1) {
+            try {
+                inputStream.transferTo(matchingSession.getOutputStream());
+            }catch (IOException e) {
+                e.printStackTrace();
+            }
+        } else {
+            try {
+                matchingSession.getInputStream().transferTo(outputStream);
+            }catch (IOException e) {
+                e.printStackTrace();
             }
         }
+
+        // Remove these instances from the map
+        fileTransferThreadInstance.removeFileTransferRequest(identifier);
+        fileTransferThreadInstance.removeFileTransferRequest(matchingSession.getIdentifier());
+
+        // Close their sockets
+        closeSocket();
+        matchingSession.closeSocket();
     }
     public String getIdentifier() {
         return identifier;
@@ -75,5 +78,15 @@ public class FileTransferSession implements Runnable{
     }
     public InputStream getInputStream() {
         return inputStream;
+    }
+    public void closeSocket() {
+        try {
+            socket.close();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+    public int getSessionNumber() {
+        return sessionNumber;
     }
 }

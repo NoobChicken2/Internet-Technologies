@@ -1,17 +1,22 @@
 package Client;
 
+import Client.Utils.ClientUtils;
+
 import java.io.*;
 import java.net.Socket;
+import java.security.NoSuchAlgorithmException;
 
 public class FileTransferClientThread implements Runnable{
 
     private String identifier;
     private String fileName;
+    private String checksum;
     private Socket fileTransferSocket = connectSocket();
 
-    public FileTransferClientThread(String identifier, String fileName) {
+    public FileTransferClientThread(String identifier, String fileName, String checksum) {
         this.identifier = identifier;
         this.fileName = fileName;
+        this.checksum = checksum;
     }
     @Override
     public void run() {
@@ -54,7 +59,6 @@ public class FileTransferClientThread implements Runnable{
     }
     private void upload() {
         System.out.println("I am uploading");
-        System.out.println(identifier);
         FileInputStream in;
 
         try {
@@ -68,17 +72,22 @@ public class FileTransferClientThread implements Runnable{
     }
     private void download() {
         System.out.println("I am downloading");
-        System.out.println(identifier);
         FileOutputStream os;
 
         try {
             os = new FileOutputStream(getDownloadPath());
             fileTransferInputStream().transferTo(os);
             os.close();
-        } catch (IOException e) {
+
+            // Compares the checksum of the file to the original checksum value
+            if (ClientUtils.checksum(getDownloadPath()).equals(checksum)) {
+                System.out.println("Download finished! File integrity is okay");
+            } else {
+                System.out.println("Download finished! File integrity is NOT okay");
+            }
+        } catch (NoSuchAlgorithmException | IOException e) {
             e.printStackTrace();
         }
-        System.out.println("Download finished");
     }
 
     private Socket connectSocket() {

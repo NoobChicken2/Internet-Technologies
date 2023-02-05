@@ -1,8 +1,6 @@
 package Server.ServerResponse;
 
 import Server.MessageProcessor;
-import Server.Server;
-import Server.FileTransferThread;
 
 import java.util.UUID;
 
@@ -58,6 +56,12 @@ public class ServerFileTransfer implements ServerResponse{
 
         return gigaBytes + " GB " + megaBytes + " MB " + kiloBytes + " KB " + bytesLeft + " B";
     }
+
+    // File Transfer Request variables
+    // request[1] -> Receiving client name
+    // request[2] -> File name
+    // request[3] -> File size
+    // request[4] -> checksum
     private void fileTransferRequest(String[] request) {
         if (!checkUsername(request[1], messageProcessor.getName())) {
             messageProcessor.sendMessage("FAIL06 User was not found");
@@ -69,9 +73,14 @@ public class ServerFileTransfer implements ServerResponse{
         }
         messageProcessor.sendMessage("TRANSFER_OK");
 
-        String notifyMessage = "TRANSFER_REQ " + messageProcessor.getName() + " " + request[2] + " " + getFileSize(Long.parseLong(request[3]));
+        String notifyMessage = "TRANSFER_REQ " + messageProcessor.getName() + " " + request[2] + " " + request[4] + " " + getFileSize(Long.parseLong(request[3]));
         messageProcessor.getServer().messageClient(request[1].trim(), notifyMessage);
     }
+
+    // File Transfer Response variables
+    // request[1] -> The response the downloader sends back (accepted or declined)
+    // request[2] -> Client name used to find and message a different message processor
+    // request[3] -> File name
     private void fileTransferResponse(String[] request) {
         switch (request[1]) {
             case "declined" -> {

@@ -77,10 +77,11 @@ public class ServerListener implements Runnable {
                 }case "TRANSFER_OK" ->{
                     System.out.println("The transfer request has been sent!");
                 }case "TRANSFER_REQ" -> {
-                    System.out.println( "The user " + response[1] + " wants to transfer a file to you named " + response[2] + " with the size " + ClientUtils.combinedMessage(3, response) + ". Enter 9 to accept and 0 to decline!");
+                    System.out.println( "The user " + response[1] + " wants to transfer a file to you named " + response[2] + " with the size " + ClientUtils.combinedMessage(4, response) + ". Enter 9 to accept and 0 to decline!");
                     client.setTransferRequest(true);
                     client.setLastTransferRequestUser(response[1]);
                     client.setLastTransferRequestFileName(response[2]);
+                    client.setLastTransferRequestChecksum(response[3]);
                 }case "TRANSFER_DECLINED" -> {
                     System.out.println("The user has declined the file transfer");
                 }case "TRANSFER_ACCEPTED" -> {
@@ -89,7 +90,7 @@ public class ServerListener implements Runnable {
                     } else {
                         System.out.println("You have accepted the file transfer. The download will start shortly.");
                     }
-                    new Thread(new FileTransferClientThread(response[1], response[2])).start();
+                    new Thread(new FileTransferClientThread(response[1], response[2], client.getLastTransferRequestChecksum())).start();
                 }case "FAIL01" ->{
                     System.out.println("User already logged in");
                 }case "FAIL02" ->{
@@ -100,7 +101,7 @@ public class ServerListener implements Runnable {
                     System.out.println("Pong without ping");
                 }case "FAIL05" -> {
                     System.out.println("Not enough users for survey");
-                }case "FAIL06"->{
+                }case "FAIL06", "FAIL10" ->{
                     System.out.println(ClientUtils.combinedMessage(1, response));
                 }case "FAIL07"-> {
                     System.out.println("usernames are incorrect");
