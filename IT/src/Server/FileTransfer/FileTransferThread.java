@@ -17,7 +17,6 @@ public class FileTransferThread implements Runnable{
 
     @Override
     public void run() {
-        System.out.println("File transfer Socket Thread started");
         while (true) {
             Socket socket = getSocket();
             sessionCount++;
