@@ -25,7 +25,7 @@ public class ClientRequestFileTransfer implements ClientRequest{
                 startFileTransfer();
             }
             case 9, 0 -> {
-                checkFileTransferAcceptInput(menuValue);
+                checkFileTransferResponseInput(menuValue);
             }
         }
     }
@@ -41,7 +41,7 @@ public class ClientRequestFileTransfer implements ClientRequest{
         }
         client.getClientInputListener().setCommand("TRANSFER " + input);
     }
-    private void checkFileTransferAcceptInput(int menuValue) {
+    private void checkFileTransferResponseInput(int menuValue) {
         if (!client.getTransferRequest()) {
             System.out.println("You are not allowed to do this right now!");
             return;
