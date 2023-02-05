@@ -27,7 +27,6 @@ public class ServerResponseSurvey implements ServerResponse {
         }
     }
     private void surveyProcessor(String request){
-        System.out.println(request);
 
         //Starting the survey
         if (request.startsWith("SURVEY START")){
@@ -63,13 +62,12 @@ public class ServerResponseSurvey implements ServerResponse {
                 TimerTask SendSummary = new TimerTask() {
                     @Override
                     public void run() {
-                        if (!mp.getSurvey().isFinished()){
+                        if (mp.getSurvey()!=null && mp.getSurvey().isFinished()!=true){
                             String respond=mp.getSurvey().getSummary();
                             mp.getServer().broadcastMessageToListOfClients(respond,mp.getSurvey().getParticipants());
                         }
                     }
                 };
-
                 surveyTimer.schedule(SendSummary, 300000);
             }
 

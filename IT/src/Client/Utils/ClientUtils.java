@@ -1,14 +1,22 @@
 package Client.Utils;
 
+import javax.crypto.Cipher;
+import javax.crypto.spec.IvParameterSpec;
+import javax.crypto.spec.SecretKeySpec;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.KeyFactory;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.security.PublicKey;
+import java.security.spec.X509EncodedKeySpec;
+import java.util.Base64;
 import java.util.InputMismatchException;
 import java.util.Scanner;
 
 public class ClientUtils {
+    protected static final String initVector = "encryptionIntVec";
     public static int getUserInput() {
         Scanner scanner = new Scanner(System.in);
         try {
@@ -61,6 +69,50 @@ public class ClientUtils {
         }
 
         return sb.toString();
+    }
+    public static PublicKey generatePkFromString(String PUBLIC_KEY_STRING){
+        PublicKey publicKey=null;
+        try{
+            X509EncodedKeySpec keySpecPublic = new X509EncodedKeySpec(decode(PUBLIC_KEY_STRING));
+
+            KeyFactory keyFactory = KeyFactory.getInstance("RSA");
+
+            publicKey = keyFactory.generatePublic(keySpecPublic);
+        }catch (Exception ignored){}
+        return publicKey;
+    }
+    private static byte[] decode(String data) {
+        return Base64.getDecoder().decode(data);
+    }
+    public static String encrypt(String PlainText, String key) {
+        try {
+            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(Cipher.ENCRYPT_MODE, skeySpec, iv);
+
+            byte[] encrypted = cipher.doFinal(PlainText.getBytes());
+            return Base64.getEncoder().encodeToString(encrypted);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
+    }
+    public static String decrypt(String encryptedMessage, String key) {
+        try {
+            IvParameterSpec iv = new IvParameterSpec(initVector.getBytes("UTF-8"));
+            SecretKeySpec skeySpec = new SecretKeySpec(key.getBytes("UTF-8"), "AES");
+
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5PADDING");
+            cipher.init(Cipher.DECRYPT_MODE, skeySpec, iv);
+            byte[] original = cipher.doFinal(Base64.getDecoder().decode(encryptedMessage));
+
+            return new String(original);
+        } catch (Exception ex) {
+            ex.printStackTrace();
+        }
+        return null;
     }
 
 }

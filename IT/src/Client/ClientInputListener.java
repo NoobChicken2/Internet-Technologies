@@ -3,11 +3,12 @@ package Client;
 import java.io.*;
 
 public class ClientInputListener implements Runnable {
-    private String command = "";
+    private String command;
     private final Client client;
     private final PrintWriter clientWriter;
     public ClientInputListener(Client client) {
         this.client = client;
+        this.command="";
         this.clientWriter = new PrintWriter(sendToServer());
     }
 
@@ -28,7 +29,7 @@ public class ClientInputListener implements Runnable {
         while(true) {
             String[] line = command.split(" ");
             switch (line[0]) {
-                case "IDENT", "BCST", "PONG", "QUIT", "LIST_REQUEST", "PRV_BCST", "SURVEY","SURVEY_EVENT", "TRANSFER", "TRANSFER_RES" -> {
+                case "IDENT", "BCST", "PONG", "QUIT", "LIST_REQUEST", "PRV_BCST", "SURVEY","SURVEY_EVENT","ENCRYPT", "TRANSFER", "TRANSFER_RES" -> {
                     clientWriter.println(command);
                     clientWriter.flush();
                     command = "";

@@ -1,12 +1,14 @@
 package Client;
 
 import Client.ClientRequest.*;
+import Client.Encryption.RSA;
 import Client.Utils.ClientUtils;
 
 import java.io.*;
 import java.net.Socket;
 import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
+import java.util.HashMap;
 
 public class Client {
     //=================Web Socket=====================
@@ -18,8 +20,12 @@ public class Client {
     private boolean hasLoggedIn;
     private String serverResponse;
     private boolean waitingResponse;
+    //=================Encryption======================
+    private HashMap<String, String>keys;
+    private HashMap<String, String>PublicKeys;
+    private RSA rsa;
+
     //=================Survey==========================
-    private boolean survey;
     private boolean clientList;
     private ArrayList<String>surveyEventCreators;
     //=================File Transfer===================
@@ -32,13 +38,16 @@ public class Client {
         this.clientInputListener = new ClientInputListener(this);
         this.serverListener = new ServerListener(this, clientInputListener);
         this.surveyEventCreators=new ArrayList<>();
+        this.keys=new HashMap<>();
+        this.PublicKeys=new HashMap<>();
         this.username="";
         this.hasLoggedIn=false;
         this.serverResponse="";
         this.waitingResponse=false;
+        this.rsa=new RSA();
     }
 
-    public void run () throws InterruptedException,IOException, NoSuchAlgorithmException {
+    public void run () throws Exception {
         Thread listenUser = new Thread(clientInputListener);
         Thread listenServer = new Thread(serverListener);
         listenServer.start();
@@ -71,16 +80,19 @@ public class Client {
                     new ClientRequestFileTransfer(this).request(menuValue);
                 }
                 case 7 -> {
-                    new ClientRequestEncryptedMessage(this).request(menuValue);
+                    new ClientRequestEncryptedMessage(this, rsa).request(menuValue);
                 }
                 case 8 -> {
                     new ClientRequestQuit(this).request(menuValue);
+                }
+                case 10 -> {
+                    printHelp();
                 }
             }
         }
     }
 
-    public static void main(String[] args) throws InterruptedException, IOException, NoSuchAlgorithmException {
+    public static void main(String[] args) throws Exception {
         new Client().run();
     }
 
@@ -95,6 +107,7 @@ public class Client {
                         6. Transfer a file
                         7. Encrypted Message
                         8. QUIT
+                        10.Help
                         -------------------------------------------
                        """);
     }
@@ -102,23 +115,31 @@ public class Client {
         System.out.println("Please login as a client: ");
         clientInputListener.setCommand("IDENT " + ClientUtils.getUserInputString());
     }
+    public void printHelp(){
+        System.out.println("===========================================================================================================================");
+        System.out.println("BCST <message> | Sends broadcast messages to everyone on the server ");
+        System.out.println("IDENT <username> | Logs you in the server");
+        System.out.println("PONG | Periodically send to the server its automatic");
+        System.out.println("LIST_REQUEST | Returns a list of all logged in clients");
+        System.out.println("SURVEY START | Starts a survey");
+        System.out.println("SURVEY Q /<question>/<answer</<answer>... | Sends a question to the server");
+        System.out.println("SURVEY Q_STOP | Stops the question sending loop and returns a list of potential participants" );
+        System.out.println("SURVEY LIST_RESPONSE /<username>/<username> | Sends invitation for the currently created survey to selected users" );
+        System.out.println("SURVEY_EVENT JOIN <Survey Creator> | Accepts survey invitation" );
+        System.out.println("SURVEY_EVENT A <answer>;<question number> | Sends answer to a question" );
+        System.out.println("Encryption...?" );
+        System.out.println("QUIT | Closes the connection to the server");
+        System.out.println("===========================================================================================================================");
+
+    }
     public ClientInputListener getClientInputListener() {
         return clientInputListener;
-    }
-    public String getUsername() {
-        return username;
     }
     public Socket getClientSocket() {
         return socket;
     }
     public boolean isClientList() {
         return clientList;
-    }
-    public boolean isSurvey() {
-        return survey;
-    }
-    public boolean isTransferRequest() {
-        return transferRequest;
     }
     public String getLastTransferRequestUser() {
         return lastTransferRequestUser;
@@ -132,9 +153,6 @@ public class Client {
     public String getServerResponse() {
         return serverResponse;
     }
-    public boolean isWaitingResponse() {
-        return waitingResponse;
-    }
     public void setWaitingResponse(boolean waitingResponse) {
         this.waitingResponse = waitingResponse;
     }
@@ -146,9 +164,6 @@ public class Client {
     }
     public void setHasLoggedIn(boolean hasLoggedIn) {
         this.hasLoggedIn = hasLoggedIn;
-    }
-    public void setSurvey(boolean survey) {
-        this.survey = survey;
     }
     public void setClientList(boolean clientList) {
         this.clientList = clientList;
@@ -171,5 +186,28 @@ public class Client {
     public void setLastTransferRequestFileName(String fileName) {
         lastTransferRequestFileName = fileName;
     }
+    public String getKey(String client) {
+        return keys.get(client);
+    }
+    public void addKey(String client, String key) {
+        this.keys.put(client, key);
+    }
+    public String getPublicKey(String client) {
+        PublicKeys.forEach((k,v) -> {
+            System.out.println("Map Test" + " " + k + " : " + v);
+        });
+        return PublicKeys.get(client);
+    }
+    public void addPublicKey(String client, String key) {
+        this.PublicKeys.put(client, key);
+        System.out.println(client + " : " + key);
+    }
 
+    public String getUsername() {
+        return username;
+    }
+
+    public RSA getRsa() {
+        return rsa;
+    }
 }

@@ -8,20 +8,20 @@ public class ClientRequestSurvey implements ClientRequest{
 
     public ClientRequestSurvey(Client client) {
         this.client=client;
-        this.client.setSurvey(false);
-        this.client.setClientList(false);
     }
 
     @Override
     public void request(int menuValue) throws InterruptedException {
         client.getClientInputListener().setCommand("SURVEY START");
         Thread.sleep(3000);
-        while (client.isSurvey()) {
+        if (client.getServerResponse().equals("SURVEY_OK")) {
+            client.setServerResponse("");
             sendQuestions();
             String[] response = client.getServerResponse().split(" ");
-            if (response[0].equals("SURVEY_LIST")){
+            if (response[0].equals("SURVEY_LIST")) {
                 sendClientList(response);
             }
+            client.setServerResponse("");
         }
     }
 
@@ -67,12 +67,12 @@ public class ClientRequestSurvey implements ClientRequest{
             System.out.println("Do you want to add a new Question?  1. Yes  |  2. No");
             int input = ClientUtils.getUserInput();
             if (input == 2) {
-                questions=false;
                 client.getClientInputListener().setCommand("SURVEY Q_STOP");
+                break;
             }
             numOfQuestions++;
             if (numOfQuestions>10){
-                questions=false;
+                break;
             }
         }
     }
