@@ -1,10 +1,9 @@
 # README
-This is the integration test suite for the module internet technology.
+This is a project made for the subject Internet Technologies from the university Saxion University of Applied Sciences. It was made by 2 students.
 
-Currently it contains test for the basic server.
+It is a java program which has a Server and a Client. Clients when the server is running connect to it and they can do multiple actions like broadcast their messages, send private messages, start a survey with multiple users, basic file transfer and send Encrypted private messages.
 
-- Server login
-- Server heartbeat
+The whole point of the program was to understand how Server Protocols work.
 
 ## Parameters
 Parameters can be configured in the testconfig.properties file
